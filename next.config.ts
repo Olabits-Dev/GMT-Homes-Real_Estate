@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
+if (!isDevelopment && !process.env.SESSION_SECRET) {
+  throw new Error("SESSION_SECRET must be set for production builds.");
+}
+
 const nextConfig: NextConfig = {
   images: {
     minimumCacheTTL: 0,

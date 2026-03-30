@@ -37,6 +37,17 @@ function hasErrors(errors: AuthFormErrors) {
   return Object.values(errors).some((value) => (value?.length ?? 0) > 0);
 }
 
+function getAuthFailureMessage(error: unknown, fallback: string) {
+  if (
+    error instanceof Error &&
+    error.message.includes("SESSION_SECRET")
+  ) {
+    return "This deployment is missing its session configuration. Add SESSION_SECRET in Vercel Production and redeploy.";
+  }
+
+  return fallback;
+}
+
 export async function signup(
   _previousState: AuthFormState,
   formData: FormData,
@@ -94,8 +105,10 @@ export async function signup(
   } catch (error) {
     console.error("Signup failed.", error);
     return {
-      message:
+      message: getAuthFailureMessage(
+        error,
         "We couldn't create your account right now. Please try again in a moment.",
+      ),
     };
   }
 
@@ -152,8 +165,10 @@ export async function login(
   } catch (error) {
     console.error("Login failed.", error);
     return {
-      message:
+      message: getAuthFailureMessage(
+        error,
         "We couldn't sign you in right now. Please try again in a moment.",
+      ),
     };
   }
 
