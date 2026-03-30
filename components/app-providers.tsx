@@ -64,10 +64,16 @@ function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function FavoritesProvider({ children }: { children: ReactNode }) {
+function FavoritesProvider({
+  children,
+  viewerId,
+}: {
+  children: ReactNode;
+  viewerId: string | null;
+}) {
   const favorites = useSyncExternalStore(
-    subscribeToFavoriteSlugs,
-    readFavoriteSlugs,
+    (callback) => subscribeToFavoriteSlugs(callback, viewerId),
+    () => readFavoriteSlugs(viewerId),
     getFavoriteSlugsServerSnapshot,
   );
 
@@ -76,7 +82,7 @@ function FavoritesProvider({ children }: { children: ReactNode }) {
       ? favorites.filter((value) => value !== slug)
       : [...favorites, slug];
 
-    writeFavoriteSlugs(nextFavorites);
+    writeFavoriteSlugs(nextFavorites, viewerId);
   };
 
   const value: FavoritesContextValue = {
@@ -93,10 +99,18 @@ function FavoritesProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function AppProviders({ children }: { children: ReactNode }) {
+export function AppProviders({
+  children,
+  viewerId,
+}: {
+  children: ReactNode;
+  viewerId: string | null;
+}) {
   return (
     <ThemeProvider>
-      <FavoritesProvider>{children}</FavoritesProvider>
+      <FavoritesProvider key={viewerId ?? "guest"} viewerId={viewerId}>
+        {children}
+      </FavoritesProvider>
     </ThemeProvider>
   );
 }

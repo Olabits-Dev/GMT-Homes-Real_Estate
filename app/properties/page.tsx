@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PropertiesExplorer } from "@/components/properties-explorer";
-import { properties } from "@/data/properties";
+import { getAllProperties } from "@/lib/community-property-store";
 import {
   parseFirstValue,
   parseSavedFilter,
@@ -21,6 +21,7 @@ export default async function PropertiesPage({
   searchParams,
 }: PropertiesPageProps) {
   const resolvedSearchParams = await searchParams;
+  const properties = await getAllProperties();
 
   const initialFilters: ListingFilters = {
     price: parseFirstValue(resolvedSearchParams.price, "all"),
@@ -41,4 +42,3 @@ export default async function PropertiesPage({
     />
   );
 }
-

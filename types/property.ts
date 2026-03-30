@@ -23,6 +23,7 @@ export type Agent = {
 export type Property = {
   id: string;
   slug: string;
+  createdAt?: string;
   title: string;
   price: number;
   billingPeriod: BillingPeriod;
@@ -43,6 +44,7 @@ export type Property = {
   amenities: string[];
   agent: Agent;
   source: "seed" | "community";
+  ownerId?: string;
   coordinates: {
     lat: number;
     lng: number;
@@ -63,4 +65,3 @@ export type ListingFilters = {
   price: string;
   savedOnly: boolean;
 };
-

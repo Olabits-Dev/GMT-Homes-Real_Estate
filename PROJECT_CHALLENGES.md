@@ -152,6 +152,26 @@ Sections like the homepage hero, snapshot cards, and listings header needed mult
 
 We iterated on widths, heights, spacing, typography, and card density until the important content stayed visible within the first screen and the sections felt more proportionate across breakpoints.
 
+## 16. The Listing Workflow Needed Real Ownership and Access Control
+
+**Problem**
+
+The original add-property flow stored community listings in browser `localStorage`, which made the demo feel interactive but did not reflect a realistic publishing workflow. There was no account ownership, no secure session, and no way to distinguish public browsing from contributor-only actions.
+
+**How We Resolved It**
+
+We introduced a lightweight authentication system with sign-up, sign-in, signed cookie sessions, protected routes, and a publisher dashboard. Community listings are now created through authenticated Server Actions and persisted in local JSON files on the server so each listing is tied to a real contributor record in the demo.
+
+## 17. Public Browsing and Protected Publishing Needed To Coexist Cleanly
+
+**Problem**
+
+GMT Homes still needed to feel open and easy to browse for visitors, while the new dashboard and publishing flow needed protection. That created a product and architecture challenge: public catalog routes should remain fast and visible, but management routes should redirect correctly and the UI should reflect the current auth state.
+
+**How We Resolved It**
+
+We kept browsing routes public and protected only the contributor workflow using `proxy.ts`, session-aware helpers, and auth-driven header navigation. The result is a split experience where anyone can explore listings, but only signed-in contributors can access `/dashboard` and `/add-property`, publish listings, and see account-specific management views.
+
 ## Summary
 
-The main pattern across this project was turning a frontend-only demo into something that still feels usable, stable, and product-like. Most of the work involved balancing visual quality, runtime reliability, browser-state handling, and responsive polish without introducing backend complexity.
+The main pattern across this project was turning a frontend-heavy demo into something that still feels usable, stable, and product-like. Most of the work involved balancing visual quality, runtime reliability, browser-state handling, authenticated publishing, and responsive polish without jumping straight to a full production backend stack.

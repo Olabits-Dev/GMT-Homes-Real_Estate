@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { PropertyDetailResolver } from "@/components/property-detail-resolver";
-import { getPropertyBySlug, properties } from "@/data/properties";
+import { notFound } from "next/navigation";
+import { PropertyDetailView } from "@/components/property-detail-view";
+import {
+  findPropertyBySlug,
+  getAllProperties,
+} from "@/lib/community-property-store";
 
 type PropertyPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const properties = await getAllProperties();
+
   return properties.map((property) => ({
     slug: property.slug,
   }));
@@ -16,7 +22,7 @@ export async function generateMetadata({
   params,
 }: PropertyPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
+  const property = await findPropertyBySlug(slug);
 
   if (!property) {
     return {
@@ -33,8 +39,11 @@ export async function generateMetadata({
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug) ?? null;
+  const property = await findPropertyBySlug(slug);
 
-  return <PropertyDetailResolver slug={slug} initialProperty={property} />;
+  if (!property) {
+    notFound();
+  }
+
+  return <PropertyDetailView property={property} />;
 }
-

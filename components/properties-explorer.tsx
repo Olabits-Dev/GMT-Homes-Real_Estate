@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { communityPropertiesEvent, readCommunityProperties } from "@/lib/browser-storage";
 import { filterProperties } from "@/lib/property-utils";
 import { useFavorites } from "@/components/app-providers";
 import { PropertyCard } from "@/components/property-card";
@@ -31,7 +30,6 @@ export function PropertiesExplorer({
   const { favorites } = useFavorites();
   const [filters, setFilters] = useState(initialFilters);
   const [viewMode, setViewMode] = useState<"grid" | "list">(initialViewMode);
-  const [communityProperties, setCommunityProperties] = useState<Property[]>([]);
   const deferredQuery = useDeferredValue(filters.query);
 
   useEffect(() => {
@@ -41,28 +39,8 @@ export function PropertiesExplorer({
   useEffect(() => {
     setViewMode(initialViewMode);
   }, [initialViewMode]);
-
-  useEffect(() => {
-    const syncCommunityProperties = () => {
-      setCommunityProperties(readCommunityProperties());
-    };
-
-    syncCommunityProperties();
-    window.addEventListener(communityPropertiesEvent, syncCommunityProperties);
-    window.addEventListener("storage", syncCommunityProperties);
-
-    return () => {
-      window.removeEventListener(
-        communityPropertiesEvent,
-        syncCommunityProperties,
-      );
-      window.removeEventListener("storage", syncCommunityProperties);
-    };
-  }, []);
-
-  const allProperties = [...communityProperties, ...properties];
   const filteredProperties = filterProperties(
-    allProperties,
+    properties,
     { ...filters, query: deferredQuery },
     favorites,
   );
@@ -81,7 +59,7 @@ export function PropertiesExplorer({
         </svg>
       ),
       label: "All listings",
-      value: allProperties.length.toString(),
+      value: properties.length.toString(),
     },
     {
       icon: (
@@ -108,7 +86,7 @@ export function PropertiesExplorer({
         </svg>
       ),
       label: "For rent",
-      value: allProperties
+      value: properties
         .filter((property) => property.status === "For Rent")
         .length.toString(),
     },
@@ -124,7 +102,7 @@ export function PropertiesExplorer({
         </svg>
       ),
       label: "For sale",
-      value: allProperties
+      value: properties
         .filter((property) => property.status === "For Sale")
         .length.toString(),
     },
@@ -205,8 +183,8 @@ export function PropertiesExplorer({
             </h1>
             <p className="mt-4 text-base leading-8 text-white/82">
               Use location keywords, price filters, and property types to narrow
-              down homes for rent or sale. Locally submitted properties also
-              appear here instantly.
+              down homes for rent or sale. Authenticated community listings also
+              appear here as soon as they are published.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-[30rem]">

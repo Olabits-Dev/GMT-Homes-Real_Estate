@@ -3,25 +3,38 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { logout } from "@/app/actions/auth";
 import { useFavorites } from "@/components/app-providers";
+import { FormSubmitButton } from "@/components/form-submit-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { AuthUser } from "@/types/auth";
 
-const navigationItems = [
-  { href: "/", label: "Home" },
-  { href: "/properties", label: "Listings" },
-  { href: "/add-property", label: "Add Property" },
-];
+type SiteHeaderProps = {
+  viewer: AuthUser | null;
+};
 
-export function SiteHeader() {
+export function SiteHeader({ viewer }: SiteHeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { favoriteCount } = useFavorites();
+  const navigationItems = viewer
+    ? [
+        { href: "/", label: "Home" },
+        { href: "/properties", label: "Listings" },
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/add-property", label: "Add Property" },
+      ]
+    : [
+        { href: "/", label: "Home" },
+        { href: "/properties", label: "Listings" },
+        { href: "/add-property", label: "Add Property" },
+      ];
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-40 border-b border-[color:var(--border)] bg-[color:color-mix(in_oklab,var(--background)_82%,transparent)] backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[92rem] items-center justify-between gap-3 px-4 py-3 sm:gap-5 sm:px-6 sm:py-4 lg:px-6 xl:px-8 2xl:max-w-[100rem]">
         <Link
           href="/"
           className="flex min-w-0 flex-1 items-center gap-2.5 text-[color:var(--foreground)] sm:gap-3 lg:flex-none"
@@ -34,13 +47,13 @@ export function SiteHeader() {
             <p className="truncate font-display text-[1.55rem] font-black leading-none tracking-[0.01em] sm:text-[2rem]">
               GMT Homes
             </p>
-            <p className="hidden max-w-[11.5rem] truncate text-[0.62rem] font-bold italic tracking-[0.04em] text-[color:color-mix(in_oklab,var(--muted)_82%,white_18%)] min-[390px]:block sm:max-w-none sm:text-xs sm:tracking-[0.08em]">
+            <p className="hidden max-w-[13.75rem] truncate text-[0.58rem] font-bold italic tracking-[0.02em] text-[color:color-mix(in_oklab,var(--muted)_82%,white_18%)] min-[390px]:block sm:max-w-none sm:text-xs sm:tracking-[0.08em]">
               We drive to excellence, giving you the best always....!!!!
             </p>
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-2 lg:flex">
+        <nav className="hidden items-center gap-1.5 xl:gap-2 lg:flex">
           {navigationItems.map((item) => {
             const active = pathname === item.href;
 
@@ -48,7 +61,7 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-[color:var(--accent-strong)] text-white" : "text-[color:var(--muted)] hover:bg-[color:var(--surface)] hover:text-[color:var(--foreground)]"}`}
+                className={`whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold transition xl:px-4 ${active ? "bg-[color:var(--accent-strong)] text-white" : "text-[color:var(--muted)] hover:bg-[color:var(--surface)] hover:text-[color:var(--foreground)]"}`}
               >
                 {item.label}
               </Link>
@@ -56,7 +69,30 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2.5 lg:flex xl:gap-3">
+          {viewer ? (
+            <div
+              className="max-w-[15rem] truncate rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] shadow-[var(--shadow-soft)]"
+              title={viewer.name}
+            >
+              {viewer.name}
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center rounded-full bg-[color:var(--accent-strong)] px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+              >
+                Create account
+              </Link>
+            </>
+          )}
           <Link
             href="/properties?saved=1"
             className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:border-[color:var(--accent)]"
@@ -66,6 +102,16 @@ export function SiteHeader() {
               {favoriteCount}
             </span>
           </Link>
+          {viewer ? (
+            <form action={logout}>
+              <FormSubmitButton
+                pendingLabel="Signing out..."
+                className="inline-flex items-center justify-center rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Sign out
+              </FormSubmitButton>
+            </form>
+          ) : null}
           <ThemeToggle />
         </div>
 
@@ -107,7 +153,7 @@ export function SiteHeader() {
 
       {menuOpen ? (
         <div className="border-t border-[color:var(--border)] lg:hidden">
-          <div className="mx-auto flex w-full max-w-7xl flex-col gap-2.5 px-4 py-4 sm:gap-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-[92rem] flex-col gap-2.5 px-4 py-4 sm:gap-3 sm:px-6 lg:px-6 xl:px-8 2xl:max-w-[100rem]">
             {navigationItems.map((item) => {
               const active = pathname === item.href;
 
@@ -132,6 +178,33 @@ export function SiteHeader() {
                 {favoriteCount}
               </span>
             </Link>
+            {viewer ? (
+              <form action={logout} onSubmit={closeMenu}>
+                <FormSubmitButton
+                  pendingLabel="Signing out..."
+                  className="inline-flex w-full items-center justify-center rounded-2xl border border-[color:var(--border)] px-4 py-3 text-sm font-semibold text-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Sign out
+                </FormSubmitButton>
+              </form>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={closeMenu}
+                  className="rounded-2xl bg-[color:var(--surface)] px-4 py-3 text-sm font-semibold text-[color:var(--foreground)]"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={closeMenu}
+                  className="rounded-2xl bg-[color:var(--accent-strong)] px-4 py-3 text-sm font-semibold text-white"
+                >
+                  Create account
+                </Link>
+              </>
+            )}
           </div>
         </div>
       ) : null}

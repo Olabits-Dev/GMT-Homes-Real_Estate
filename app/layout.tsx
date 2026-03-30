@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { AppProviders } from "@/components/app-providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getCurrentUser } from "@/lib/auth";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -37,6 +38,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const viewerPromise = getCurrentUser();
+
   return (
     <html
       lang="en"
@@ -44,14 +47,30 @@ export default function RootLayout({
       className={`${manrope.variable} ${cormorant.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <AppProviders>
-          <div className="flex min-h-screen flex-col bg-background text-foreground">
-            <SiteHeader />
-            <main className="flex-1">{children}</main>
-            <SiteFooter />
-          </div>
-        </AppProviders>
+        <AppShell viewerPromise={viewerPromise}>
+          {children}
+        </AppShell>
       </body>
     </html>
+  );
+}
+
+async function AppShell({
+  children,
+  viewerPromise,
+}: {
+  children: React.ReactNode;
+  viewerPromise: ReturnType<typeof getCurrentUser>;
+}) {
+  const viewer = await viewerPromise;
+
+  return (
+    <AppProviders viewerId={viewer?.id ?? null}>
+      <div className="flex min-h-screen flex-col bg-background text-foreground">
+        <SiteHeader viewer={viewer} />
+        <main className="flex-1">{children}</main>
+        <SiteFooter />
+      </div>
+    </AppProviders>
   );
 }

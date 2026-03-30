@@ -1,8 +1,8 @@
 # GMT Homes
 
-GMT Homes is a polished real estate platform built with Next.js App Router for GMT Software's frontend training brief. It presents a modern property-browsing experience where visitors can discover homes for rent or sale, save favorites, inspect full property details, and submit demo listings locally without a backend.
+GMT Homes is a polished real estate platform built with Next.js App Router for GMT Software's frontend training brief. It now combines a public property-browsing experience with a lightweight authentication and publishing workflow where visitors can explore listings freely, create accounts, sign in, access a publisher dashboard, and submit community listings through protected server actions.
 
-The current build goes beyond the base brief with a branded GMT Homes experience, a rotating homepage hero, locally hosted property photography, WhatsApp-first contact actions, interactive galleries, and local persistence for saved homes, theme preference, and community-added listings.
+The current build goes beyond the base brief with a branded GMT Homes experience, a rotating homepage hero, locally hosted property photography, WhatsApp-first contact actions, interactive galleries, secure cookie-based sessions, and a server-backed publishing flow for community-added listings.
 
 ## Live Product Scope
 
@@ -14,8 +14,10 @@ The app currently includes:
 - a searchable listings page with filters for location, property type, listing status, price range, and saved-only results
 - grid and list display modes for browsing listings
 - dynamic property detail pages with image gallery, fullscreen lightbox, amenities, coordinates, Google Maps link, and WhatsApp contact actions
-- an add-property workflow that lets users create demo listings locally and see them appear instantly in the catalog
-- persistent favorites and dark mode using browser storage
+- sign-up and sign-in flows for community contributors
+- a protected publisher dashboard for reviewing recent submissions
+- an add-property workflow that requires authentication and publishes community listings to a server-backed store so they appear instantly in the catalog
+- persistent favorites and dark mode using browser storage, with favorites scoped per signed-in user
 - fully local seeded property media stored under `public/properties` so the core catalog does not depend on third-party image hosts at runtime
 
 ## Pages
@@ -40,7 +42,7 @@ The listings page includes:
 - search by location keyword
 - filters for property type, status, price range, and saved homes
 - grid and list view switching
-- support for both seeded listings and user-added local listings
+- support for both seeded listings and authenticated community listings
 
 ### `/properties/[slug]`
 
@@ -53,6 +55,31 @@ Each property detail page includes:
 - WhatsApp and phone contact actions
 - location coordinates and Google Maps deep link
 
+### `/login`
+
+The sign-in experience includes:
+
+- an account login form powered by a Server Action
+- validation feedback for incorrect or incomplete credentials
+- redirect support back into protected flows such as `/dashboard` or `/add-property`
+
+### `/signup`
+
+The sign-up experience includes:
+
+- account creation for community listing contributors
+- validation for name, email, password strength, and password confirmation
+- automatic session creation and redirect into the protected publisher workflow
+
+### `/dashboard`
+
+The dashboard includes:
+
+- an authenticated publisher landing page
+- account summary cards
+- a recent submission list for the signed-in user
+- direct paths back into the add-property and public listings flows
+
 ### `/add-property`
 
 The add-property experience includes:
@@ -60,8 +87,10 @@ The add-property experience includes:
 - a structured listing form for title, type, status, price, city, location, bedrooms, bathrooms, and description
 - simulated image upload feedback
 - automatic default gallery assignment by property type
-- instant local persistence using `localStorage`
-- a recent local listings panel powered by browser storage
+- server-side validation through a protected Server Action
+- authenticated publishing tied to the signed-in account
+- instant appearance in the public listings directory and dashboard
+- a recent account listings panel sourced from the signed-in publisher record
 
 ## Key Features
 
@@ -69,7 +98,7 @@ The add-property experience includes:
 
 - editorial GMT Homes branding and sea-blue visual system
 - responsive layouts across mobile, tablet, and desktop
-- readable card-based UI across homepage, listings, details, and form flows
+- readable card-based UI across homepage, listings, details, auth, dashboard, and form flows
 - light and dark mode support
 
 ### Property Discovery
@@ -79,17 +108,25 @@ The add-property experience includes:
 - dynamic property routes
 - saved homes workflow
 
+### Authentication and Publishing
+
+- account sign-up and sign-in flows
+- cookie-based session management for authenticated routes
+- protected `/dashboard` and `/add-property` routes via `proxy.ts`
+- server-backed community listing creation with account ownership
+- per-user favorites storage keyed by the signed-in account
+
 ### Media and Visuals
 
 - all seeded housing photos served locally from `public/properties`
 - hero background slideshow on the homepage
 - click-to-expand property images with fullscreen modal preview
 
-### Local Interactivity
+### Local and Demo-Friendly Persistence
 
 - favorites saved in browser storage
 - theme preference saved in browser storage
-- community listings saved in browser storage
+- authenticated community listings persisted on the server in local JSON files for the demo environment
 - hydration-safe client state powered by `useSyncExternalStore`
 
 ## Tech Stack
@@ -99,53 +136,96 @@ The add-property experience includes:
 - TypeScript
 - Tailwind CSS 4
 - App Router
+- Server Actions
+- `proxy.ts` route protection
 - `next/font` for typography
-- browser `localStorage` for local persistence
+- browser `localStorage` for favorites and theme persistence
+- Node file-backed JSON storage for demo users and community listings
 
 ## Project Structure
 
 ```text
 app/
+  actions/
   add-property/
+  dashboard/
+  login/
   properties/
     [slug]/
+  signup/
 components/
   add-property-form.tsx
   app-providers.tsx
   favorite-button.tsx
+  form-submit-button.tsx
   home-hero.tsx
   image-lightbox.tsx
+  login-form.tsx
   properties-explorer.tsx
   property-card.tsx
   property-detail-view.tsx
   property-gallery.tsx
   site-footer.tsx
   site-header.tsx
+  signup-form.tsx
 data/
+  auth-users.json
+  community-properties.json
+  listing-options.ts
   properties.ts
 lib/
+  auth-store.ts
+  auth.ts
   browser-storage.ts
+  community-property-store.ts
+  file-store.ts
+  passwords.ts
   property-utils.ts
+  session.ts
 public/
   properties/
 types/
+proxy.ts
 ```
 
 ## Data Model and State
 
 Seeded listing data lives in `data/properties.ts` and powers the homepage hero, featured cards, listings page, and property detail routes.
 
-Browser-side persistence lives in `lib/browser-storage.ts` and stores:
+Server-backed demo persistence now lives in local JSON files under `data/`:
+
+- `data/auth-users.json` stores contributor accounts
+- `data/community-properties.json` stores authenticated community submissions
+
+The publishing flow is coordinated by:
+
+- `lib/auth-store.ts` for account lookup and creation
+- `lib/session.ts` for signed cookie sessions
+- `lib/auth.ts` for session-aware helpers and protected route flow
+- `lib/community-property-store.ts` for reading and writing community listings
+
+Browser-side persistence still lives in `lib/browser-storage.ts` and stores:
 
 - saved property slugs
 - theme preference
-- community-submitted listings
 
-Context providers in `components/app-providers.tsx` expose favorites and theme controls across the app.
+Context providers in `components/app-providers.tsx` expose favorites and theme controls across the app, with favorites now separated by signed-in user.
+
+## Authentication Process
+
+The current auth flow is intentionally lightweight and demo-friendly, but it now follows a real application structure:
+
+1. A contributor signs up on `/signup` or signs in on `/login`.
+2. The form submits to a Server Action in `app/actions/auth.ts`.
+3. Credentials are validated on the server and accounts are stored in `data/auth-users.json`.
+4. A signed session cookie is created through `lib/session.ts`.
+5. `proxy.ts` protects `/dashboard` and `/add-property`, redirecting unauthenticated users to `/login`.
+6. Authenticated users can publish from `/add-property`, and the submission is stored in `data/community-properties.json`.
+7. Published community listings immediately appear in the public listings directory and on the contributor dashboard.
 
 ## Contact Flow
 
-The app currently uses GMT Homes contact actions centered around WhatsApp and phone support. Seeded listings and local listings route contact interactions to the GMT Homes contact number currently configured in the property agent data and footer.
+The app currently uses GMT Homes contact actions centered around WhatsApp and phone support. Seeded listings use the configured GMT Homes advisor records, while authenticated community listings carry the signed-in contributor's name and email alongside the GMT Homes phone support flow.
 
 ## Getting Started
 
@@ -157,6 +237,8 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+For production-like auth behavior, copy `.env.example` to `.env.local` and provide a strong `SESSION_SECRET`.
 
 ## Available Scripts
 
@@ -178,13 +260,13 @@ npm run build
 
 ## Challenges Solved During the Build
 
-### 1. Making a demo app feel real without a backend
+### 1. Making a demo app feel real without a database
 
-The project brief allowed dummy data, but the experience needed to feel usable. Seeded catalog data was combined with browser persistence so users can add local listings and see them reflected in the browsing flow instantly.
+The project brief allowed dummy data, but the experience needed to feel usable. Seeded catalog data was first combined with browser persistence, and later extended into a server-backed demo publishing flow so signed-in contributors can add listings and see them reflected in the browsing flow instantly.
 
 ### 2. Preventing hydration and external store issues
 
-Because favorites, theme mode, and community listings depend on browser storage, the app needed hydration-safe snapshots. The current implementation uses `useSyncExternalStore` with stable server snapshots to avoid client/server mismatch issues.
+Because favorites and theme mode depend on browser storage, the app needed hydration-safe snapshots. The current implementation uses `useSyncExternalStore` with stable server snapshots to avoid client/server mismatch issues.
 
 ### 3. Removing third-party image runtime dependency
 
@@ -192,12 +274,16 @@ The seeded property galleries were moved to locally hosted media under `public/p
 
 ### 4. Keeping the UI consistent while iterating heavily
 
-The app evolved from the original brief into a more brand-led real estate experience. Reusable card styles, shared spacing patterns, and modular components helped keep the interface coherent while homepage, listings, and property details continued to change.
+The app evolved from the original brief into a more brand-led real estate experience. Reusable card styles, shared spacing patterns, and modular components helped keep the interface coherent while homepage, listings, property details, auth, and dashboard screens continued to change.
+
+### 5. Adding authentication without losing the fast demo workflow
+
+The app originally treated listing submissions as browser-only state, which made ownership, access control, and repeat publishing unrealistic. The current build introduces account creation, sign-in, signed sessions, route protection, and a protected dashboard while still keeping the demo simple through local JSON storage instead of a full database.
 
 ## Future Improvements
 
-- connect listings to a database or CMS
-- add real authentication for buyers, renters, and agents
+- move users, sessions, and community listings from local JSON files to a real database
+- extend authentication beyond the current publisher flow for buyers, renters, and agents
 - support real image uploads with cloud storage
 - add scheduling or inspection booking
 - integrate embedded maps instead of link-out only
@@ -206,4 +292,4 @@ The app evolved from the original brief into a more brand-led real estate experi
 
 ## Summary
 
-GMT Homes now delivers a complete frontend property experience with branded presentation, interactive browsing, local media assets, persistent user actions, and a realistic no-backend demo flow that aligns closely with the work completed in this project.
+GMT Homes now delivers a complete property experience with branded presentation, interactive browsing, authenticated publishing, protected contributor routes, local media assets, persistent user actions, and a realistic demo-ready workflow that is much closer to a real product than the original frontend-only brief.

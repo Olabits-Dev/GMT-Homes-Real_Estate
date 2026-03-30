@@ -2,20 +2,28 @@
 
 import type { Property } from "@/types/property";
 
-export const favoritesStorageKey = "gmt-favorite-properties";
+export const favoritesStorageKeyPrefix = "gmt-favorite-properties";
 export const themeStorageKey = "gmt-theme-preference";
 export const communityPropertiesStorageKey = "gmt-community-properties";
-export const favoritesEvent = "gmt-favorites-updated";
+export const favoritesEventPrefix = "gmt-favorites-updated";
 export const themeEvent = "gmt-theme-updated";
 export const communityPropertiesEvent = "gmt-community-properties-updated";
 
 export type ThemeMode = "light" | "dark";
 const emptyFavoriteSlugs: string[] = [];
 const emptyCommunityProperties: Property[] = [];
-let favoriteSlugsRawCache: string | null | undefined;
-let favoriteSlugsSnapshotCache: string[] = emptyFavoriteSlugs;
+const favoriteSlugsRawCache = new Map<string, string | null | undefined>();
+const favoriteSlugsSnapshotCache = new Map<string, string[]>();
 let communityPropertiesRawCache: string | null | undefined;
 let communityPropertiesSnapshotCache: Property[] = emptyCommunityProperties;
+
+export function getFavoritesStorageKey(userId?: string | null) {
+  return `${favoritesStorageKeyPrefix}:${userId ?? "guest"}`;
+}
+
+export function getFavoritesEventName(userId?: string | null) {
+  return `${favoritesEventPrefix}:${userId ?? "guest"}`;
+}
 
 export function readJSON<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") {
@@ -43,70 +51,83 @@ export function writeJSON<T>(key: string, value: T) {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function readFavoriteSlugs() {
+export function readFavoriteSlugs(userId?: string | null) {
   if (typeof window === "undefined") {
     return emptyFavoriteSlugs;
   }
 
-  const rawValue = window.localStorage.getItem(favoritesStorageKey);
+  const storageKey = getFavoritesStorageKey(userId);
+  const rawValue = window.localStorage.getItem(storageKey);
+  const cachedRawValue = favoriteSlugsRawCache.get(storageKey);
 
-  if (rawValue === favoriteSlugsRawCache) {
-    return favoriteSlugsSnapshotCache;
+  if (rawValue === cachedRawValue) {
+    return favoriteSlugsSnapshotCache.get(storageKey) ?? emptyFavoriteSlugs;
   }
 
-  favoriteSlugsRawCache = rawValue;
+  favoriteSlugsRawCache.set(storageKey, rawValue);
 
   if (!rawValue) {
-    favoriteSlugsSnapshotCache = emptyFavoriteSlugs;
-    return favoriteSlugsSnapshotCache;
+    favoriteSlugsSnapshotCache.set(storageKey, emptyFavoriteSlugs);
+    return favoriteSlugsSnapshotCache.get(storageKey) ?? emptyFavoriteSlugs;
   }
 
   try {
     const parsedValue = JSON.parse(rawValue) as unknown;
-    favoriteSlugsSnapshotCache = Array.isArray(parsedValue)
-      ? parsedValue.filter((value): value is string => typeof value === "string")
-      : emptyFavoriteSlugs;
+    favoriteSlugsSnapshotCache.set(
+      storageKey,
+      Array.isArray(parsedValue)
+        ? parsedValue.filter((value): value is string => typeof value === "string")
+        : emptyFavoriteSlugs,
+    );
   } catch {
-    favoriteSlugsSnapshotCache = emptyFavoriteSlugs;
+    favoriteSlugsSnapshotCache.set(storageKey, emptyFavoriteSlugs);
   }
 
-  return favoriteSlugsSnapshotCache;
+  return favoriteSlugsSnapshotCache.get(storageKey) ?? emptyFavoriteSlugs;
 }
 
 export function getFavoriteSlugsServerSnapshot() {
   return emptyFavoriteSlugs;
 }
 
-export function writeFavoriteSlugs(favorites: string[]) {
+export function writeFavoriteSlugs(favorites: string[], userId?: string | null) {
   if (typeof window === "undefined") {
     return;
   }
 
-  favoriteSlugsSnapshotCache = favorites;
-  favoriteSlugsRawCache = JSON.stringify(favorites);
-  window.localStorage.setItem(favoritesStorageKey, favoriteSlugsRawCache);
-  window.dispatchEvent(new Event(favoritesEvent));
+  const storageKey = getFavoritesStorageKey(userId);
+  const eventName = getFavoritesEventName(userId);
+  const serializedValue = JSON.stringify(favorites);
+  favoriteSlugsSnapshotCache.set(storageKey, favorites);
+  favoriteSlugsRawCache.set(storageKey, serializedValue);
+  window.localStorage.setItem(storageKey, serializedValue);
+  window.dispatchEvent(new Event(eventName));
 }
 
-export function subscribeToFavoriteSlugs(callback: () => void) {
+export function subscribeToFavoriteSlugs(
+  callback: () => void,
+  userId?: string | null,
+) {
   if (typeof window === "undefined") {
     return () => undefined;
   }
 
+  const storageKey = getFavoritesStorageKey(userId);
+  const eventName = getFavoritesEventName(userId);
   const handleFavorites = () => callback();
   const handleStorage = (event: StorageEvent) => {
-    if (event.key && event.key !== favoritesStorageKey) {
+    if (event.key && event.key !== storageKey) {
       return;
     }
 
     callback();
   };
 
-  window.addEventListener(favoritesEvent, handleFavorites);
+  window.addEventListener(eventName, handleFavorites);
   window.addEventListener("storage", handleStorage);
 
   return () => {
-    window.removeEventListener(favoritesEvent, handleFavorites);
+    window.removeEventListener(eventName, handleFavorites);
     window.removeEventListener("storage", handleStorage);
   };
 }

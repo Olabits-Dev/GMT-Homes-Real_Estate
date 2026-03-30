@@ -96,10 +96,12 @@ export function HomeHero({
 
       <div className="relative z-30 mx-auto grid min-h-[18rem] w-full max-w-7xl items-center gap-5 px-4 py-7 sm:px-6 sm:py-8 lg:min-h-[20rem] lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-8">
         <div className="max-w-[42rem]">
-          <div className="inline-flex max-w-full flex-wrap items-center gap-3 rounded-full border border-white/16 bg-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-white/80 backdrop-blur-sm">
-            <span>GMT Homes</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-white/78" />
-            <span className="max-w-[22rem] text-white/88 normal-case italic tracking-[0.02em]">
+          <div className="inline-flex max-w-full flex-col items-start gap-1.5 rounded-[1.75rem] border border-white/16 bg-white/10 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.24em] text-white/80 backdrop-blur-sm min-[390px]:px-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:rounded-full sm:px-4 sm:py-2">
+            <div className="flex items-center gap-3">
+              <span>GMT Homes</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-white/78" />
+            </div>
+            <span className="max-w-[26rem] text-[0.82rem] leading-6 text-white/88 normal-case italic tracking-[0.01em] sm:max-w-[22rem] sm:text-inherit sm:leading-normal sm:tracking-[0.02em]">
               We drive to excellence, giving you the best always....!!!!
             </span>
           </div>
