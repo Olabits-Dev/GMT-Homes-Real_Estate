@@ -18,7 +18,10 @@ export async function readDataFile<T>(fileName: string, fallback: T) {
       throw error;
     }
 
-    await writeDataFile(fileName, fallback);
+    if (process.env.NODE_ENV !== "production") {
+      await writeDataFile(fileName, fallback);
+    }
+
     return fallback;
   }
 }

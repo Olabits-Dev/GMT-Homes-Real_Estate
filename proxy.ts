@@ -17,7 +17,13 @@ function buildLoginRedirect(request: NextRequest) {
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const session = await decrypt(request.cookies.get(sessionCookieName)?.value);
+  let session = null;
+
+  try {
+    session = await decrypt(request.cookies.get(sessionCookieName)?.value);
+  } catch (error) {
+    console.error("Failed to read the proxy session.", error);
+  }
 
   if (matchesRoute(pathname, protectedRoutes) && !session?.userId) {
     return NextResponse.redirect(buildLoginRedirect(request));

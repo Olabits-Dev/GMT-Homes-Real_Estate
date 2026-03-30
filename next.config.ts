@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 0,
     unoptimized: isDevelopment,
   },
+  outputFileTracingIncludes: {
+    "/*": ["./data/**/*.json"],
+  },
   async headers() {
     if (!isDevelopment) {
       return [];

@@ -7,7 +7,13 @@ import { decrypt, sessionCookieName } from "@/lib/session";
 export const getSession = cache(async () => {
   const cookieStore = await cookies();
   const session = cookieStore.get(sessionCookieName)?.value;
-  return decrypt(session);
+
+  try {
+    return await decrypt(session);
+  } catch (error) {
+    console.error("Failed to read the current session.", error);
+    return null;
+  }
 });
 
 export const getCurrentUser = cache(async () => {
@@ -17,13 +23,18 @@ export const getCurrentUser = cache(async () => {
     return null;
   }
 
-  const user = await findUserById(session.userId);
+  try {
+    const user = await findUserById(session.userId);
 
-  if (!user) {
+    if (!user) {
+      return null;
+    }
+
+    return toPublicUser(user);
+  } catch (error) {
+    console.error("Failed to load the current user.", error);
     return null;
   }
-
-  return toPublicUser(user);
 });
 
 export async function requireUser() {

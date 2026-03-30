@@ -69,24 +69,43 @@ export async function signup(
     };
   }
 
-  const existingUser = await findUserByEmail(email);
+  let userId: string;
 
-  if (existingUser) {
+  try {
+    const existingUser = await findUserByEmail(email);
+
+    if (existingUser) {
+      return {
+        errors: {
+          email: ["An account with this email already exists."],
+        },
+        message: "Use a different email or sign in instead.",
+      };
+    }
+
+    const user = await createUser({
+      email,
+      name,
+      password,
+    });
+
+    userId = user.id;
+    await createSession(user.id);
+  } catch (error) {
+    console.error("Signup failed.", error);
     return {
-      errors: {
-        email: ["An account with this email already exists."],
-      },
-      message: "Use a different email or sign in instead.",
+      message:
+        "We couldn't create your account right now. Please try again in a moment.",
     };
   }
 
-  const user = await createUser({
-    email,
-    name,
-    password,
-  });
+  if (!userId) {
+    return {
+      message:
+        "We couldn't create your account right now. Please try again in a moment.",
+    };
+  }
 
-  await createSession(user.id);
   redirect(nextPath);
 }
 
@@ -114,18 +133,37 @@ export async function login(
     };
   }
 
-  const user = await findUserByEmail(email);
+  let userId: string | null = null;
 
-  if (
-    !user ||
-    !(await verifyPassword(password, user.passwordSalt, user.passwordHash))
-  ) {
+  try {
+    const user = await findUserByEmail(email);
+
+    if (
+      !user ||
+      !(await verifyPassword(password, user.passwordSalt, user.passwordHash))
+    ) {
+      return {
+        message: "We couldn't sign you in with those credentials.",
+      };
+    }
+
+    userId = user.id;
+    await createSession(user.id);
+  } catch (error) {
+    console.error("Login failed.", error);
     return {
-      message: "We couldn't sign you in with those credentials.",
+      message:
+        "We couldn't sign you in right now. Please try again in a moment.",
     };
   }
 
-  await createSession(user.id);
+  if (!userId) {
+    return {
+      message:
+        "We couldn't sign you in right now. Please try again in a moment.",
+    };
+  }
+
   redirect(nextPath);
 }
 
