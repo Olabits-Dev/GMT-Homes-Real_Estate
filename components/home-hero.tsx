@@ -100,7 +100,7 @@ export function HomeHero({
             <span>GMT Homes</span>
             <span className="h-1.5 w-1.5 rounded-full bg-white/78" />
             <span className="max-w-[22rem] text-white/88 normal-case italic tracking-[0.02em]">
-              We drive to excellence give you the best always.....!!!
+              We drive to excellence, giving you the best always....!!!!
             </span>
           </div>
 

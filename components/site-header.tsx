@@ -35,7 +35,7 @@ export function SiteHeader() {
               GMT Homes
             </p>
             <p className="text-xs font-bold italic tracking-[0.08em] text-[color:color-mix(in_oklab,var(--muted)_82%,white_18%)]">
-              We drive to excellence give you the best always.....!!!
+              We drive to excellence, giving you the best always....!!!!
             </p>
           </div>
         </Link>

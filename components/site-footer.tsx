@@ -9,7 +9,7 @@ export function SiteFooter() {
             GMT Homes
           </p>
           <p className="max-w-md text-sm font-bold italic leading-7 text-[color:color-mix(in_oklab,var(--muted)_82%,white_18%)]">
-            We drive to excellence give you the best always.....!!!
+            We drive to excellence, giving you the best always....!!!!
           </p>
           <p className="max-w-md text-sm leading-7 text-[color:var(--muted)]">
             Helping customers discover standout properties for rent, sale, and

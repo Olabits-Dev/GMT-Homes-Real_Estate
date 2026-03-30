@@ -22,11 +22,11 @@ export const metadata: Metadata = {
     template: "%s | GMT Homes",
   },
   description:
-    "GMT Homes. We drive to excellence give you the best always.....!!! Browse standout homes for rent, sale, and investment opportunities.",
+    "GMT Homes. We drive to excellence, giving you the best always....!!!! Browse standout homes for rent, sale, and investment opportunities.",
   metadataBase: new URL("https://gmthomes.example"),
   openGraph: {
     description:
-      "GMT Homes. We drive to excellence give you the best always.....!!! Explore featured homes, trusted listings, and investment opportunities.",
+      "GMT Homes. We drive to excellence, giving you the best always....!!!! Explore featured homes, trusted listings, and investment opportunities.",
     title: "GMT Homes",
     type: "website",
   },
