@@ -21,20 +21,20 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[color:var(--border)] bg-[color:color-mix(in_oklab,var(--background)_82%,transparent)] backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4 lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-3 text-[color:var(--foreground)]"
+          className="flex min-w-0 flex-1 items-center gap-2.5 text-[color:var(--foreground)] sm:gap-3 lg:flex-none"
           onClick={closeMenu}
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[color:var(--accent-strong)] text-sm font-black tracking-[0.24em] text-white">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color:var(--accent-strong)] text-[0.78rem] font-black tracking-[0.22em] text-white sm:h-11 sm:w-11 sm:rounded-2xl sm:text-sm sm:tracking-[0.24em]">
             GMT
           </div>
-          <div>
-            <p className="font-display text-[2rem] font-black leading-none tracking-[0.01em]">
+          <div className="min-w-0">
+            <p className="truncate font-display text-[1.55rem] font-black leading-none tracking-[0.01em] sm:text-[2rem]">
               GMT Homes
             </p>
-            <p className="text-xs font-bold italic tracking-[0.08em] text-[color:color-mix(in_oklab,var(--muted)_82%,white_18%)]">
+            <p className="hidden max-w-[11.5rem] truncate text-[0.62rem] font-bold italic tracking-[0.04em] text-[color:color-mix(in_oklab,var(--muted)_82%,white_18%)] min-[390px]:block sm:max-w-none sm:text-xs sm:tracking-[0.08em]">
               We drive to excellence, giving you the best always....!!!!
             </p>
           </div>
@@ -69,12 +69,12 @@ export function SiteHeader() {
           <ThemeToggle />
         </div>
 
-        <div className="flex items-center gap-3 lg:hidden">
+        <div className="flex shrink-0 items-center gap-2.5 sm:gap-3 lg:hidden">
           <ThemeToggle />
           <button
             type="button"
             onClick={() => setMenuOpen((value) => !value)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--foreground)] shadow-[var(--shadow-soft)]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--foreground)] shadow-[var(--shadow-soft)] sm:h-11 sm:w-11"
             aria-expanded={menuOpen}
             aria-label="Toggle navigation menu"
           >
@@ -107,7 +107,7 @@ export function SiteHeader() {
 
       {menuOpen ? (
         <div className="border-t border-[color:var(--border)] lg:hidden">
-          <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-2.5 px-4 py-4 sm:gap-3 sm:px-6 lg:px-8">
             {navigationItems.map((item) => {
               const active = pathname === item.href;
 
