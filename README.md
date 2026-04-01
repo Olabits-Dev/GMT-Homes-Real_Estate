@@ -140,7 +140,8 @@ The add-property experience includes:
 - `proxy.ts` route protection
 - `next/font` for typography
 - browser `localStorage` for favorites and theme persistence
-- Node file-backed JSON storage for demo users and community listings
+- Neon Postgres for deployed auth and community listing storage
+- local JSON fallback for development-only auth and community listing storage
 
 ## Project Structure
 
@@ -194,15 +195,16 @@ proxy.ts
 
 Seeded listing data lives in `data/properties.ts` and powers the homepage hero, featured cards, listings page, and property detail routes.
 
-Server-backed demo persistence now lives in local JSON files under `data/`:
+Server-backed persistence now supports two environments:
 
-- `data/auth-users.json` stores contributor accounts at runtime and is gitignored
-- `data/community-properties.json` stores authenticated community submissions at runtime and is gitignored
+- production and Vercel deployments use Neon Postgres through `DATABASE_URL`
+- local development can still fall back to `data/auth-users.json` and `data/community-properties.json`
 - `data/auth-users.example.json` and `data/community-properties.example.json` are safe tracked templates
 
 The publishing flow is coordinated by:
 
 - `lib/auth-store.ts` for account lookup and creation
+- `lib/database.ts` for Neon connection setup and schema bootstrapping
 - `lib/session.ts` for signed cookie sessions
 - `lib/auth.ts` for session-aware helpers and protected route flow
 - `lib/community-property-store.ts` for reading and writing community listings
@@ -221,11 +223,13 @@ The current auth flow is intentionally lightweight and demo-friendly, but it now
 
 1. A contributor signs up on `/signup` or signs in on `/login`.
 2. The form submits to a Server Action in `app/actions/auth.ts`.
-3. Credentials are validated on the server and accounts are stored in the local runtime file `data/auth-users.json`.
+3. Credentials are validated on the server and contributor accounts are stored in Neon Postgres when `DATABASE_URL` is configured.
 4. A signed session cookie is created through `lib/session.ts`.
 5. `proxy.ts` protects `/dashboard` and `/add-property`, redirecting unauthenticated users to `/login`.
-6. Authenticated users can publish from `/add-property`, and the submission is stored in the local runtime file `data/community-properties.json`.
+6. Authenticated users can publish from `/add-property`, and the submission is stored in Neon Postgres when `DATABASE_URL` is configured.
 7. Published community listings immediately appear in the public listings directory and on the contributor dashboard.
+
+For local development without a database, the same flows can fall back to the gitignored `data/*.json` runtime files.
 
 ## Contact Flow
 
@@ -242,16 +246,16 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-For production-like auth behavior, copy `.env.example` to `.env.local` and provide a strong `SESSION_SECRET` plus the correct `SITE_URL` and GMT Homes contact values.
+For production-like auth behavior, copy `.env.example` to `.env.local` and provide a strong `SESSION_SECRET`, a valid `DATABASE_URL`, plus the correct `SITE_URL` and GMT Homes contact values.
 
 ## Security Notes
 
 - Keep real secrets in `.env.local` for local development and in Vercel Project Settings for deployed environments.
 - Commit `.env.example`, but never commit `.env.local`, `.env.production`, or other real env files.
-- `SESSION_SECRET`, `SITE_URL`, and GMT Homes contact settings are loaded through `lib/server-env.ts` so sensitive runtime config stays out of client code.
-- `data/auth-users.json` and `data/community-properties.json` are runtime-only demo data files and are gitignored. The committed `*.example.json` files are the safe templates.
+- `SESSION_SECRET`, `DATABASE_URL`, `SITE_URL`, and GMT Homes contact settings are loaded from environment variables so sensitive runtime config stays out of client code.
+- `data/auth-users.json` and `data/community-properties.json` are development-only runtime data files and are gitignored. The committed `*.example.json` files are the safe templates.
 - If `SESSION_SECRET` is rotated, existing signed-in sessions become invalid and users must sign in again.
-- This project still uses local JSON storage for demo auth and community submissions. For real production security and durability, move users, sessions, and listings to a database or managed storage service.
+- Deployed auth and community submissions now expect a real database connection. If `DATABASE_URL` is missing in production, sign-in and publishing will fail safely with a configuration message.
 
 ## Available Scripts
 
@@ -273,9 +277,9 @@ npm run build
 
 ## Challenges Solved During the Build
 
-### 1. Making a demo app feel real without a database
+### 1. Making a demo app feel real while moving beyond local files
 
-The project brief allowed dummy data, but the experience needed to feel usable. Seeded catalog data was first combined with browser persistence, and later extended into a server-backed demo publishing flow so signed-in contributors can add listings and see them reflected in the browsing flow instantly.
+The project brief allowed dummy data, but the experience needed to feel usable. Seeded catalog data was first combined with browser persistence, then extended into a server-backed publishing flow, and finally moved to a Vercel-compatible database path so signed-in contributors can publish reliably after deployment.
 
 ### 2. Preventing hydration and external store issues
 
@@ -291,11 +295,11 @@ The app evolved from the original brief into a more brand-led real estate experi
 
 ### 5. Adding authentication without losing the fast demo workflow
 
-The app originally treated listing submissions as browser-only state, which made ownership, access control, and repeat publishing unrealistic. The current build introduces account creation, sign-in, signed sessions, route protection, and a protected dashboard while still keeping the demo simple through local JSON storage instead of a full database.
+The app originally treated listing submissions as browser-only state, which made ownership, access control, and repeat publishing unrealistic. The current build introduces account creation, sign-in, signed sessions, route protection, and a protected dashboard, while keeping local development simple through a JSON fallback and using Neon-backed storage for deployed environments.
 
 ## Future Improvements
 
-- move users, sessions, and community listings from local JSON files to a real database
+- add schema migrations and admin tooling around the current Neon-backed storage
 - extend authentication beyond the current publisher flow for buyers, renters, and agents
 - support real image uploads with cloud storage
 - add scheduling or inspection booking

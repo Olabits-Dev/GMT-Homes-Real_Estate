@@ -26,6 +26,17 @@ function hasErrors(errors: PropertyFormErrors) {
   return Object.values(errors).some((value) => (value?.length ?? 0) > 0);
 }
 
+function getPropertyFailureMessage(error: unknown) {
+  if (
+    error instanceof Error &&
+    error.message.includes("DATABASE_URL")
+  ) {
+    return "This deployment is missing its database configuration. Add DATABASE_URL in Vercel Production and redeploy.";
+  }
+
+  return "We couldn't publish your property right now. Please try again in a moment.";
+}
+
 function isUploadedFile(value: FormDataEntryValue): value is File {
   return typeof value === "object" && "name" in value && "size" in value;
 }
@@ -99,25 +110,33 @@ export async function createPropertyAction(
     };
   }
 
-  const property = await createCommunityProperty(
-    {
-      bathrooms,
-      bedrooms,
-      cityLabel,
-      description,
-      imageNames,
-      location,
-      price,
-      status,
-      title,
-      type,
-    },
-    user,
-  );
+  try {
+    const property = await createCommunityProperty(
+      {
+        bathrooms,
+        bedrooms,
+        cityLabel,
+        description,
+        imageNames,
+        location,
+        price,
+        status,
+        title,
+        type,
+      },
+      user,
+    );
 
-  revalidatePath("/add-property");
-  revalidatePath("/dashboard");
-  revalidatePath("/properties");
-  revalidatePath(`/properties/${property.slug}`);
+    revalidatePath("/add-property");
+    revalidatePath("/dashboard");
+    revalidatePath("/properties");
+    revalidatePath(`/properties/${property.slug}`);
+  } catch (error) {
+    console.error("Property creation failed.", error);
+    return {
+      message: getPropertyFailureMessage(error),
+    };
+  }
+
   redirect("/dashboard?created=1");
 }

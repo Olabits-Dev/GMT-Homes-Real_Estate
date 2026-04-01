@@ -1,22 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PropertyDetailView } from "@/components/property-detail-view";
-import {
-  findPropertyBySlug,
-  getAllProperties,
-} from "@/lib/community-property-store";
+import { findPropertyBySlug } from "@/lib/community-property-store";
+
+export const dynamic = "force-dynamic";
 
 type PropertyPageProps = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateStaticParams() {
-  const properties = await getAllProperties();
-
-  return properties.map((property) => ({
-    slug: property.slug,
-  }));
-}
 
 export async function generateMetadata({
   params,

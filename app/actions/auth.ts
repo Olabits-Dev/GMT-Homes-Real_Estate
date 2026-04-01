@@ -38,11 +38,14 @@ function hasErrors(errors: AuthFormErrors) {
 }
 
 function getAuthFailureMessage(error: unknown, fallback: string) {
-  if (
-    error instanceof Error &&
-    error.message.includes("SESSION_SECRET")
-  ) {
-    return "This deployment is missing its session configuration. Add SESSION_SECRET in Vercel Production and redeploy.";
+  if (error instanceof Error) {
+    if (error.message.includes("SESSION_SECRET")) {
+      return "This deployment is missing its session configuration. Add SESSION_SECRET in Vercel Production and redeploy.";
+    }
+
+    if (error.message.includes("DATABASE_URL")) {
+      return "This deployment is missing its database configuration. Add DATABASE_URL in Vercel Production and redeploy.";
+    }
   }
 
   return fallback;

@@ -7,6 +7,8 @@ import {
 } from "@/lib/property-utils";
 import type { ListingFilters } from "@/types/property";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Property Listings",
   description:

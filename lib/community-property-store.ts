@@ -5,6 +5,11 @@ import {
   getPropertyBySlug as getSeedPropertyBySlug,
   properties as seededProperties,
 } from "@/data/properties";
+import {
+  isDatabaseConfigured,
+  isUsingLocalFileStore,
+  withDatabase,
+} from "@/lib/database";
 import { readDataFile, writeDataFile } from "@/lib/file-store";
 import { slugify } from "@/lib/property-utils";
 import { getGmtContactConfig } from "@/lib/server-env";
@@ -12,6 +17,10 @@ import type { AuthUser } from "@/types/auth";
 import type { ListingStatus, Property, PropertyType } from "@/types/property";
 
 const communityPropertiesFileName = "community-properties.json";
+
+type DatabasePropertyRow = {
+  property_data: Property | string;
+};
 
 type CommunityPropertyInput = {
   bathrooms: number;
@@ -59,14 +68,55 @@ function createUniqueSlug(title: string, city: string, existingSlugs: Set<string
   return `${baseSlug}-${suffix}`;
 }
 
+function parseDatabaseProperty(row: DatabasePropertyRow) {
+  if (typeof row.property_data === "string") {
+    return JSON.parse(row.property_data) as Property;
+  }
+
+  return row.property_data;
+}
+
 export async function getCommunityProperties() {
-  const properties = await readDataFile<Property[]>(communityPropertiesFileName, []);
-  return sortProperties(properties);
+  if (isUsingLocalFileStore()) {
+    const properties = await readDataFile<Property[]>(communityPropertiesFileName, []);
+    return sortProperties(properties);
+  }
+
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
+  return withDatabase(async (sql) => {
+    const rows = (await sql`
+      SELECT property_data
+      FROM community_properties
+      ORDER BY created_at DESC
+    `) as DatabasePropertyRow[];
+
+    return rows.map(parseDatabaseProperty);
+  });
 }
 
 export async function getCommunityPropertiesByOwner(ownerId: string) {
-  const properties = await getCommunityProperties();
-  return properties.filter((property) => property.ownerId === ownerId);
+  if (isUsingLocalFileStore()) {
+    const properties = await getCommunityProperties();
+    return properties.filter((property) => property.ownerId === ownerId);
+  }
+
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
+  return withDatabase(async (sql) => {
+    const rows = (await sql`
+      SELECT property_data
+      FROM community_properties
+      WHERE owner_id = ${ownerId}
+      ORDER BY created_at DESC
+    `) as DatabasePropertyRow[];
+
+    return rows.map(parseDatabaseProperty);
+  });
 }
 
 export async function getAllProperties() {
@@ -81,8 +131,26 @@ export async function findPropertyBySlug(slug: string) {
     return seedProperty;
   }
 
-  const communityProperties = await getCommunityProperties();
-  return communityProperties.find((property) => property.slug === slug) ?? null;
+  if (isUsingLocalFileStore()) {
+    const communityProperties = await getCommunityProperties();
+    return communityProperties.find((property) => property.slug === slug) ?? null;
+  }
+
+  if (!isDatabaseConfigured()) {
+    return null;
+  }
+
+  return withDatabase(async (sql) => {
+    const rows = (await sql`
+      SELECT property_data
+      FROM community_properties
+      WHERE slug = ${slug}
+      LIMIT 1
+    `) as DatabasePropertyRow[];
+
+    const [property] = rows;
+    return property ? parseDatabaseProperty(property) : null;
+  });
 }
 
 export async function createCommunityProperty(
@@ -142,10 +210,39 @@ export async function createCommunityProperty(
     yearBuilt: new Date().getFullYear(),
   };
 
-  await writeDataFile(communityPropertiesFileName, [
-    nextProperty,
-    ...existingProperties,
-  ]);
+  if (isUsingLocalFileStore()) {
+    await writeDataFile(communityPropertiesFileName, [
+      nextProperty,
+      ...existingProperties,
+    ]);
+
+    return nextProperty;
+  }
+
+  if (!isDatabaseConfigured()) {
+    throw new Error(
+      "DATABASE_URL is required for authenticated property publishing. Add a Neon Postgres database in Vercel and redeploy.",
+    );
+  }
+
+  await withDatabase(async (sql) => {
+    await sql`
+      INSERT INTO community_properties (
+        id,
+        slug,
+        owner_id,
+        created_at,
+        property_data
+      )
+      VALUES (
+        ${nextProperty.id},
+        ${nextProperty.slug},
+        ${user.id},
+        ${createdAt},
+        ${JSON.stringify(nextProperty)}::jsonb
+      )
+    `;
+  });
 
   return nextProperty;
 }
