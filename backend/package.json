@@ -10,6 +10,7 @@
     "db:migrate": "node --import tsx src/scripts/db.ts migrate",
     "db:status": "node --import tsx src/scripts/db.ts status",
     "db:summary": "node --import tsx src/scripts/db.ts summary",
+    "db:import-legacy-auth": "node --import tsx src/scripts/db.ts import-legacy-auth",
     "db:make-admin": "node --import tsx src/scripts/db.ts make-admin"
   },
   "dependencies": {
