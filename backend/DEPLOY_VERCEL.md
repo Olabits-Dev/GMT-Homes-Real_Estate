@@ -30,7 +30,7 @@ The Vercel entrypoint is:
 - `framework: null`
 - `buildCommand: ""`
 - `outputDirectory: "public"`
-- a rewrite from `^/api/(.*)$` to `/api?route=$1`
+- a rewrite from `/api/(.*)` to `/api/index?route=$1`
 
 This keeps the backend in the `Other` framework preset, skips the package `build` script during deployment, and gives Vercel a valid `public` directory if the project still performs an output-directory check.
 
