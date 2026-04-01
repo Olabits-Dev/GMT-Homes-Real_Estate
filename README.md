@@ -169,9 +169,10 @@ components/
   site-header.tsx
   signup-form.tsx
 data/
-  auth-users.json
-  community-properties.json
+  auth-users.example.json
+  community-properties.example.json
   listing-options.ts
+  property-options.ts
   properties.ts
 lib/
   auth-store.ts
@@ -181,6 +182,7 @@ lib/
   file-store.ts
   passwords.ts
   property-utils.ts
+  server-env.ts
   session.ts
 public/
   properties/
@@ -194,8 +196,9 @@ Seeded listing data lives in `data/properties.ts` and powers the homepage hero, 
 
 Server-backed demo persistence now lives in local JSON files under `data/`:
 
-- `data/auth-users.json` stores contributor accounts
-- `data/community-properties.json` stores authenticated community submissions
+- `data/auth-users.json` stores contributor accounts at runtime and is gitignored
+- `data/community-properties.json` stores authenticated community submissions at runtime and is gitignored
+- `data/auth-users.example.json` and `data/community-properties.example.json` are safe tracked templates
 
 The publishing flow is coordinated by:
 
@@ -203,6 +206,7 @@ The publishing flow is coordinated by:
 - `lib/session.ts` for signed cookie sessions
 - `lib/auth.ts` for session-aware helpers and protected route flow
 - `lib/community-property-store.ts` for reading and writing community listings
+- `lib/server-env.ts` for server-only environment configuration
 
 Browser-side persistence still lives in `lib/browser-storage.ts` and stores:
 
@@ -217,10 +221,10 @@ The current auth flow is intentionally lightweight and demo-friendly, but it now
 
 1. A contributor signs up on `/signup` or signs in on `/login`.
 2. The form submits to a Server Action in `app/actions/auth.ts`.
-3. Credentials are validated on the server and accounts are stored in `data/auth-users.json`.
+3. Credentials are validated on the server and accounts are stored in the local runtime file `data/auth-users.json`.
 4. A signed session cookie is created through `lib/session.ts`.
 5. `proxy.ts` protects `/dashboard` and `/add-property`, redirecting unauthenticated users to `/login`.
-6. Authenticated users can publish from `/add-property`, and the submission is stored in `data/community-properties.json`.
+6. Authenticated users can publish from `/add-property`, and the submission is stored in the local runtime file `data/community-properties.json`.
 7. Published community listings immediately appear in the public listings directory and on the contributor dashboard.
 
 ## Contact Flow
@@ -238,7 +242,16 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-For production-like auth behavior, copy `.env.example` to `.env.local` and provide a strong `SESSION_SECRET`.
+For production-like auth behavior, copy `.env.example` to `.env.local` and provide a strong `SESSION_SECRET` plus the correct `SITE_URL` and GMT Homes contact values.
+
+## Security Notes
+
+- Keep real secrets in `.env.local` for local development and in Vercel Project Settings for deployed environments.
+- Commit `.env.example`, but never commit `.env.local`, `.env.production`, or other real env files.
+- `SESSION_SECRET`, `SITE_URL`, and GMT Homes contact settings are loaded through `lib/server-env.ts` so sensitive runtime config stays out of client code.
+- `data/auth-users.json` and `data/community-properties.json` are runtime-only demo data files and are gitignored. The committed `*.example.json` files are the safe templates.
+- If `SESSION_SECRET` is rotated, existing signed-in sessions become invalid and users must sign in again.
+- This project still uses local JSON storage for demo auth and community submissions. For real production security and durability, move users, sessions, and listings to a database or managed storage service.
 
 ## Available Scripts
 
