@@ -10,12 +10,12 @@ Use these settings in the Vercel dashboard when importing the repo:
 - Root Directory: `backend`
 - Include source files outside of the Root Directory: `Enabled`
 - Install Command: leave default or use `npm install`
-- Build Command: leave empty
-- Output Directory: leave empty
+- Build Command: override it and leave it empty
+- Output Directory: `public`
 
 The `Include source files outside of the Root Directory` setting matters because the backend imports shared types and data from `../shared`.
 
-If Vercel has already auto-filled a Build Command or Output Directory for this project, clear both values in the dashboard before redeploying.
+If Vercel has already auto-filled a Build Command or Output Directory for this project, set them to the values above before redeploying.
 
 ## Runtime Shape
 
@@ -28,10 +28,18 @@ It forwards all `/api/*` requests into the shared backend handler in `src/app.ts
 `vercel.json` also forces:
 
 - `framework: null`
-- `buildCommand: null`
-- `outputDirectory: null`
+- `buildCommand: ""`
+- `outputDirectory: "public"`
 
-This prevents Vercel from treating the backend like a static-output project.
+This keeps the backend in the `Other` framework preset, skips the package `build` script during deployment, and gives Vercel a valid `public` directory if the project still performs an output-directory check.
+
+The backend now ships a small compatibility page at:
+
+- `public/index.html`
+
+That page is only there to satisfy Vercel's static output expectation for `Other` projects. The actual backend API still runs from:
+
+- `api/[...route].ts`
 
 Local development still runs through:
 
@@ -103,6 +111,7 @@ After deployment, test:
 - `GET /api/meta/capabilities`
 - `GET /api/properties`
 - `POST /api/auth/login`
+- `GET /` should show a simple backend status page
 
 If auth or publishing fails, verify that:
 

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GMT Homes Backend</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #081521;
+        color: #e8f6fc;
+      }
+
+      main {
+        width: min(42rem, calc(100vw - 2rem));
+        border: 1px solid rgba(97, 193, 223, 0.18);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        background: rgba(11, 28, 40, 0.9);
+        box-shadow: 0 24px 64px rgba(1, 11, 18, 0.35);
+      }
+
+      h1 {
+        margin: 0 0 0.75rem;
+        font-size: clamp(1.75rem, 3vw, 2.5rem);
+      }
+
+      p {
+        margin: 0.75rem 0 0;
+        line-height: 1.7;
+        color: rgba(232, 246, 252, 0.82);
+      }
+
+      code {
+        color: #61c1df;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>GMT Homes backend is running.</h1>
+      <p>
+        This deployment exposes the API for authentication, listings, moderation,
+        and inspection booking.
+      </p>
+      <p>
+        Try <code>/api/meta/capabilities</code> or <code>/api/properties</code>.
+      </p>
+    </main>
+  </body>
+</html>
