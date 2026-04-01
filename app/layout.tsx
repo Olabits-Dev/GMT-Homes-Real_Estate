@@ -4,6 +4,7 @@ import { AppProviders } from "@/components/app-providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth";
+import { getSiteUrl } from "@/lib/server-env";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
   },
   description:
     "GMT Homes. We drive to excellence, giving you the best always....!!!! Browse standout homes for rent, sale, and investment opportunities.",
-  metadataBase: new URL("https://gmthomes.example"),
+  metadataBase: getSiteUrl(),
   openGraph: {
     description:
       "GMT Homes. We drive to excellence, giving you the best always....!!!! Explore featured homes, trusted listings, and investment opportunities.",

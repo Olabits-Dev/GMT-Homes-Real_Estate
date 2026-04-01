@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { createPropertyAction } from "@/app/actions/properties";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { cityOptions } from "@/data/listing-options";
-import { propertyTypes } from "@/data/properties";
+import { propertyTypes } from "@/data/property-options";
 import { formatPrice } from "@/lib/property-utils";
 import type { PropertyFormState } from "@/types/auth";
 import type { ListingStatus, Property, PropertyType } from "@/types/property";

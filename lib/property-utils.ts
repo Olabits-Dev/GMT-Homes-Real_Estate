@@ -1,4 +1,4 @@
-import { priceRanges } from "@/data/properties";
+import { priceRanges } from "@/data/property-options";
 import type { BillingPeriod, ListingFilters, Property } from "@/types/property";
 
 export function formatPrice(price: number, billingPeriod: BillingPeriod) {
@@ -91,4 +91,3 @@ export function filterProperties(
     return haystack.includes(normalizedQuery);
   });
 }
-

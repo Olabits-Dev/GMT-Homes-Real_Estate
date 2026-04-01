@@ -7,6 +7,7 @@ import {
 } from "@/data/properties";
 import { readDataFile, writeDataFile } from "@/lib/file-store";
 import { slugify } from "@/lib/property-utils";
+import { getGmtContactConfig } from "@/lib/server-env";
 import type { AuthUser } from "@/types/auth";
 import type { ListingStatus, Property, PropertyType } from "@/types/property";
 
@@ -88,6 +89,7 @@ export async function createCommunityProperty(
   input: CommunityPropertyInput,
   user: AuthUser,
 ) {
+  const gmtContact = getGmtContactConfig();
   const existingProperties = await getCommunityProperties();
   const selectedCity =
     cityOptions.find((option) => option.label === input.cityLabel) ?? cityOptions[0];
@@ -97,12 +99,12 @@ export async function createCommunityProperty(
   );
   const nextProperty: Property = {
     agent: {
-      company: "GMT Homes",
+      company: gmtContact.company,
       email: user.email,
       initials: getInitials(user.name),
       name: user.name,
-      phone: "+234 803 520 8600",
-      responseTime: "Usually responds within 30 minutes",
+      phone: gmtContact.phone,
+      responseTime: gmtContact.listingResponseTime,
       role: "Listing Owner",
     },
     amenities: [

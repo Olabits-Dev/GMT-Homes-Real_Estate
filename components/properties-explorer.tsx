@@ -11,7 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { filterProperties } from "@/lib/property-utils";
 import { useFavorites } from "@/components/app-providers";
 import { PropertyCard } from "@/components/property-card";
-import { priceRanges, propertyTypes } from "@/data/properties";
+import { priceRanges, propertyTypes } from "@/data/property-options";
 import type { ListingFilters, Property } from "@/types/property";
 
 type PropertiesExplorerProps = {

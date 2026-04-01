@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cityOptions } from "@/data/listing-options";
-import { propertyTypes } from "@/data/properties";
+import { propertyTypes } from "@/data/property-options";
 import { requireUser } from "@/lib/auth";
 import { createCommunityProperty } from "@/lib/community-property-store";
 import type {

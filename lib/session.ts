@@ -1,20 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { getSessionSecret } from "@/lib/server-env";
 import type { SessionPayload } from "@/types/auth";
 
 export const sessionCookieName = "gmt-session";
-
-function getSessionSecret() {
-  if (process.env.SESSION_SECRET) {
-    return process.env.SESSION_SECRET;
-  }
-
-  if (process.env.NODE_ENV !== "production") {
-    return "gmt-homes-development-session-secret";
-  }
-
-  throw new Error("SESSION_SECRET is required in production.");
-}
 
 function encodeBase64Url(value: string) {
   return Buffer.from(value, "utf8").toString("base64url");

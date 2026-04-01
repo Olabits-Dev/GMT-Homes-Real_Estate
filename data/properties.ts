@@ -1,4 +1,7 @@
-import type { PriceRangeOption, Property, PropertyType } from "@/types/property";
+import "server-only";
+
+import { getGmtContactConfig } from "@/lib/server-env";
+import type { Property, PropertyType } from "@/types/property";
 
 // Free-use housing photos stored locally under public/properties.
 const housingPhotos = {
@@ -15,31 +18,16 @@ const housingPhotos = {
   warmMinimalApartment: "/properties/library/warm-minimal-apartment.jpg",
 };
 
-export const propertyTypes: PropertyType[] = [
-  "Apartment",
-  "Duplex",
-  "Penthouse",
-  "Studio",
-  "Terrace",
-  "Villa",
-];
-
-export const priceRanges: PriceRangeOption[] = [
-  { value: "all", label: "Any budget" },
-  { value: "under-10m", label: "Under ₦10M", max: 10_000_000 },
-  { value: "10m-80m", label: "₦10M to ₦80M", min: 10_000_000, max: 80_000_000 },
-  { value: "80m-180m", label: "₦80M to ₦180M", min: 80_000_000, max: 180_000_000 },
-  { value: "180m-plus", label: "Above ₦180M", min: 180_000_000 },
-];
+const gmtContact = getGmtContactConfig();
 
 const gmtAgent = {
-  company: "GMT Homes",
-  email: "hello@gmthomes.co",
-  initials: "GO",
-  name: "Grace Olanrewaju",
-  phone: "+234 803 520 8600",
-  responseTime: "Usually responds within 20 minutes",
-  role: "Lead Property Advisor",
+  company: gmtContact.company,
+  email: gmtContact.email,
+  initials: gmtContact.initials,
+  name: gmtContact.name,
+  phone: gmtContact.phone,
+  responseTime: gmtContact.responseTime,
+  role: gmtContact.role,
 } as const;
 
 export const properties: Property[] = [
