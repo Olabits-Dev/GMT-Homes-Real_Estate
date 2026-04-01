@@ -272,6 +272,34 @@ The workspace uses separate frontend and backend env files:
 - run `npm run db:migrate` to apply schema changes, `npm run db:status` to inspect migration state, and `npm run db:summary` to inspect current storage totals
 - after creating your first admin user, run `npm run db:make-admin -- person@example.com` to promote that account into the admin console
 
+### Backend on Vercel
+
+The backend now has a Vercel-friendly function entrypoint at `backend/api/[...route].ts` and keeps local development through `backend/src/index.ts`.
+
+When importing the backend as its own Vercel project:
+
+- set the Root Directory to `backend`
+- use the `Other` framework preset
+- enable `Include source files outside of the Root Directory`
+- add the backend environment variables from `backend/.env.example`
+- run `npm run db:migrate` against the production database before first real traffic
+
+See [backend/DEPLOY_VERCEL.md](/Users/macbookpro/Desktop/real-estate-platform/backend/DEPLOY_VERCEL.md) for the exact backend dashboard settings and env checklist.
+
+### Frontend on Vercel
+
+The frontend can be imported separately as a Next.js project with Root Directory `frontend`.
+
+For the safest rollout:
+
+1. deploy the backend first
+2. copy the backend deployment URL into the frontend project's `BACKEND_BASE_URL`
+3. use the exact same `BACKEND_SERVICE_TOKEN` value in both projects
+4. set `SITE_URL` to the frontend public URL
+5. add the Cloudinary envs in the frontend project if you want real image uploads
+
+See [frontend/DEPLOY_VERCEL.md](/Users/macbookpro/Desktop/real-estate-platform/frontend/DEPLOY_VERCEL.md) for the exact frontend dashboard settings and env checklist.
+
 ## Security Notes
 
 - Keep real secrets in `.env.local` for local development and in Vercel Project Settings for deployed environments.

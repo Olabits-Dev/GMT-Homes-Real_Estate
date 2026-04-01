@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch src --watch data --watch ../shared --ext ts,json --legacy-watch --signal SIGTERM --exec \"node --import tsx src/index.ts\"",
+    "dev": "nodemon --watch api --watch src --watch data --watch ../shared --ext ts,json --legacy-watch --signal SIGTERM --exec \"node --import tsx src/index.ts\"",
     "build": "tsc --noEmit -p tsconfig.json",
     "start": "node --import tsx src/index.ts",
     "lint": "tsc --noEmit -p tsconfig.json",
