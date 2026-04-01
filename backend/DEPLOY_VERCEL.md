@@ -10,10 +10,12 @@ Use these settings in the Vercel dashboard when importing the repo:
 - Root Directory: `backend`
 - Include source files outside of the Root Directory: `Enabled`
 - Install Command: leave default or use `npm install`
-- Build Command: leave default or use `npm run build`
+- Build Command: leave empty
 - Output Directory: leave empty
 
 The `Include source files outside of the Root Directory` setting matters because the backend imports shared types and data from `../shared`.
+
+If Vercel has already auto-filled a Build Command or Output Directory for this project, clear both values in the dashboard before redeploying.
 
 ## Runtime Shape
 
@@ -22,6 +24,14 @@ The Vercel entrypoint is:
 - `api/[...route].ts`
 
 It forwards all `/api/*` requests into the shared backend handler in `src/app.ts`.
+
+`vercel.json` also forces:
+
+- `framework: null`
+- `buildCommand: null`
+- `outputDirectory: null`
+
+This prevents Vercel from treating the backend like a static-output project.
 
 Local development still runs through:
 
