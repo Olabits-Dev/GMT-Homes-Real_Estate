@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { updateInspectionBookingStatusAction } from "@/app/actions/properties";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import type { ActionFeedbackState } from "@/types/property-actions";
 import type { InspectionBookingStatus } from "@/types/property";
 
 type InspectionBookingStatusFormProps = {
@@ -10,7 +11,7 @@ type InspectionBookingStatusFormProps = {
   currentStatus: InspectionBookingStatus;
 };
 
-const initialState = {};
+const initialState: ActionFeedbackState = {};
 
 export function InspectionBookingStatusForm({
   bookingId,

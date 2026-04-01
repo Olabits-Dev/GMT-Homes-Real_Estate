@@ -13,6 +13,11 @@ import {
   updateCommunityPropertyModeration,
 } from "@/lib/community-property-store";
 import type {
+  ActionFeedbackState,
+  InspectionBookingFormErrors,
+  InspectionBookingFormState,
+} from "@/types/property-actions";
+import type {
   InspectionBookingStatus,
   ListingStatus,
   PropertyType,
@@ -21,24 +26,6 @@ import type {
 import type { PropertyFormErrors, PropertyFormState } from "@/types/auth";
 
 const allowedStatuses: ListingStatus[] = ["For Rent", "For Sale"];
-
-type InspectionBookingFormErrors = {
-  message?: string[];
-  preferredDate?: string[];
-  preferredTime?: string[];
-  requesterPhone?: string[];
-};
-
-type InspectionBookingFormState = {
-  errors?: InspectionBookingFormErrors;
-  message?: string;
-  successMessage?: string;
-};
-
-type ModerationFormState = {
-  message?: string;
-  successMessage?: string;
-};
 
 function pushError(
   errors: PropertyFormErrors,
@@ -274,9 +261,9 @@ export async function requestInspectionBookingAction(
 }
 
 export async function moderatePropertyAction(
-  _previousState: ModerationFormState,
+  _previousState: ActionFeedbackState,
   formData: FormData,
-): Promise<ModerationFormState> {
+): Promise<ActionFeedbackState> {
   const admin = await requireAdmin();
   const propertyId = String(formData.get("propertyId") ?? "").trim();
   const propertySlug = String(formData.get("propertySlug") ?? "").trim();
@@ -326,9 +313,9 @@ export async function moderatePropertyAction(
 }
 
 export async function updateInspectionBookingStatusAction(
-  _previousState: ModerationFormState,
+  _previousState: ActionFeedbackState,
   formData: FormData,
-): Promise<ModerationFormState> {
+): Promise<ActionFeedbackState> {
   const user = await requireUser();
   const bookingId = String(formData.get("bookingId") ?? "").trim();
   const status = normalizeInspectionBookingStatus(

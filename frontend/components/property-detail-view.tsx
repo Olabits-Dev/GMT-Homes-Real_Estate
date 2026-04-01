@@ -7,6 +7,7 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { PropertyGallery } from "@/components/property-gallery";
 import { formatNumber, formatPrice } from "@/lib/property-utils";
+import type { InspectionBookingFormState } from "@/types/property-actions";
 import type { AuthUser } from "@/types/auth";
 import type { Property } from "@/types/property";
 
@@ -15,7 +16,7 @@ type PropertyDetailViewProps = {
   viewer: AuthUser | null;
 };
 
-const initialBookingState = {};
+const initialBookingState: InspectionBookingFormState = {};
 
 function getModerationLabel(status: Property["moderationStatus"]) {
   if (status === "approved") {

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { moderatePropertyAction } from "@/app/actions/properties";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import type { ActionFeedbackState } from "@/types/property-actions";
 import type { PropertyModerationStatus } from "@/types/property";
 
 type ModerationFormProps = {
@@ -11,7 +12,7 @@ type ModerationFormProps = {
   propertySlug: string;
 };
 
-const initialState = {};
+const initialState: ActionFeedbackState = {};
 
 export function ModerationForm({
   currentStatus,
