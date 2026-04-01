@@ -14,6 +14,11 @@ function getEnv(name: string, fallback?: string) {
   throw new Error(`${name} is required.`);
 }
 
+function getOptionalEnv(name: string) {
+  const value = process.env[name]?.trim();
+  return value ? value : null;
+}
+
 function getDefaultSiteUrl() {
   return process.env.NODE_ENV === "production"
     ? "https://gmt-homes.vercel.app"
@@ -30,6 +35,47 @@ export function getSiteUrl() {
   } catch {
     return new URL(getDefaultSiteUrl());
   }
+}
+
+export function getPasswordResetEmailConfig() {
+  const host = getOptionalEnv("PASSWORD_RESET_SMTP_HOST");
+  const port = getOptionalEnv("PASSWORD_RESET_SMTP_PORT");
+  const user = getOptionalEnv("PASSWORD_RESET_SMTP_USER");
+  const password = getOptionalEnv("PASSWORD_RESET_SMTP_PASS");
+  const from = getOptionalEnv("PASSWORD_RESET_FROM_EMAIL");
+
+  if (!host || !port || !user || !password || !from) {
+    return null;
+  }
+
+  const portNumber = Number(port);
+
+  if (!Number.isInteger(portNumber) || portNumber <= 0) {
+    return null;
+  }
+
+  const secure =
+    getOptionalEnv("PASSWORD_RESET_SMTP_SECURE") === "true" || portNumber === 465;
+
+  return {
+    from,
+    host,
+    password,
+    port: portNumber,
+    secure,
+    user,
+  };
+}
+
+export function getPasswordResetTokenTtlMinutes() {
+  const rawValue = getOptionalEnv("PASSWORD_RESET_TOKEN_TTL_MINUTES");
+  const parsedValue = rawValue ? Number(rawValue) : NaN;
+
+  if (Number.isFinite(parsedValue) && parsedValue > 0) {
+    return parsedValue;
+  }
+
+  return 30;
 }
 
 export function getGmtContactConfig() {

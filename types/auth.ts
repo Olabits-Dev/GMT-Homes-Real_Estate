@@ -8,6 +8,8 @@ export type AuthUser = {
 export type StoredUser = AuthUser & {
   passwordHash: string;
   passwordSalt: string;
+  passwordResetExpiresAt?: string | null;
+  passwordResetTokenHash?: string | null;
 };
 
 export type SessionPayload = {
@@ -42,4 +44,27 @@ export type PropertyFormErrors = {
 export type PropertyFormState = {
   errors?: PropertyFormErrors;
   message?: string;
+};
+
+export type PasswordResetFormErrors = {
+  confirmPassword?: string[];
+  currentPassword?: string[];
+  newPassword?: string[];
+};
+
+export type PasswordResetFormState = {
+  errors?: PasswordResetFormErrors;
+  message?: string;
+  successMessage?: string;
+};
+
+export type ForgotPasswordFormErrors = {
+  email?: string[];
+};
+
+export type ForgotPasswordFormState = {
+  errors?: ForgotPasswordFormErrors;
+  message?: string;
+  resetLink?: string;
+  successMessage?: string;
 };

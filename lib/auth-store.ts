@@ -16,6 +16,8 @@ type DatabaseUserRow = {
   id: string;
   name: string;
   password_hash: string;
+  password_reset_token_expires_at: string | Date | null;
+  password_reset_token_hash: string | null;
   password_salt: string;
 };
 
@@ -30,6 +32,10 @@ function mapDatabaseUser(row: DatabaseUserRow): StoredUser {
     id: row.id,
     name: row.name,
     passwordHash: row.password_hash,
+    passwordResetExpiresAt: row.password_reset_token_expires_at
+      ? new Date(row.password_reset_token_expires_at).toISOString()
+      : null,
+    passwordResetTokenHash: row.password_reset_token_hash,
     passwordSalt: row.password_salt,
   };
 }
@@ -50,7 +56,15 @@ export async function getUsers() {
 
   return withDatabase(async (sql) => {
     const rows = (await sql`
-      SELECT id, name, email, password_hash, password_salt, created_at
+      SELECT
+        id,
+        name,
+        email,
+        password_hash,
+        password_reset_token_hash,
+        password_reset_token_expires_at,
+        password_salt,
+        created_at
       FROM auth_users
       ORDER BY created_at DESC
     `) as DatabaseUserRow[];
@@ -69,7 +83,15 @@ export async function findUserByEmail(email: string) {
 
   return withDatabase(async (sql) => {
     const rows = (await sql`
-      SELECT id, name, email, password_hash, password_salt, created_at
+      SELECT
+        id,
+        name,
+        email,
+        password_hash,
+        password_reset_token_hash,
+        password_reset_token_expires_at,
+        password_salt,
+        created_at
       FROM auth_users
       WHERE email = ${normalizedEmail}
       LIMIT 1
@@ -88,7 +110,15 @@ export async function findUserById(userId: string) {
 
   return withDatabase(async (sql) => {
     const rows = (await sql`
-      SELECT id, name, email, password_hash, password_salt, created_at
+      SELECT
+        id,
+        name,
+        email,
+        password_hash,
+        password_reset_token_hash,
+        password_reset_token_expires_at,
+        password_salt,
+        created_at
       FROM auth_users
       WHERE id = ${userId}
       LIMIT 1
@@ -156,4 +186,113 @@ export async function createUser(input: {
   }
 
   return toPublicUser(nextUser);
+}
+
+export async function updateUserPassword(userId: string, password: string) {
+  const { passwordHash, passwordSalt } = await hashPassword(password);
+
+  if (isUsingLocalFileStore()) {
+    const users = await getUsers();
+    const nextUsers = users.map((user) =>
+      user.id === userId
+        ? {
+            ...user,
+            passwordHash,
+            passwordResetExpiresAt: null,
+            passwordResetTokenHash: null,
+            passwordSalt,
+          }
+        : user,
+    );
+
+    await writeDataFile(usersFileName, nextUsers);
+    return;
+  }
+
+  await withDatabase(async (sql) => {
+    await sql`
+      UPDATE auth_users
+      SET
+        password_hash = ${passwordHash},
+        password_reset_token_hash = NULL,
+        password_reset_token_expires_at = NULL,
+        password_salt = ${passwordSalt}
+      WHERE id = ${userId}
+    `;
+  });
+}
+
+export async function setUserPasswordResetToken(
+  userId: string,
+  tokenHash: string,
+  expiresAt: string,
+) {
+  if (isUsingLocalFileStore()) {
+    const users = await getUsers();
+    const nextUsers = users.map((user) =>
+      user.id === userId
+        ? {
+            ...user,
+            passwordResetExpiresAt: expiresAt,
+            passwordResetTokenHash: tokenHash,
+          }
+        : user,
+    );
+
+    await writeDataFile(usersFileName, nextUsers);
+    return;
+  }
+
+  await withDatabase(async (sql) => {
+    await sql`
+      UPDATE auth_users
+      SET
+        password_reset_token_hash = ${tokenHash},
+        password_reset_token_expires_at = ${expiresAt}
+      WHERE id = ${userId}
+    `;
+  });
+}
+
+export async function findUserByPasswordResetTokenHash(tokenHash: string) {
+  if (isUsingLocalFileStore()) {
+    const users = await getUsers();
+    const now = Date.now();
+
+    return (
+      users.find((user) => {
+        if (
+          !user.passwordResetTokenHash ||
+          !user.passwordResetExpiresAt ||
+          user.passwordResetTokenHash !== tokenHash
+        ) {
+          return false;
+        }
+
+        return Date.parse(user.passwordResetExpiresAt) > now;
+      }) ?? null
+    );
+  }
+
+  return withDatabase(async (sql) => {
+    const rows = (await sql`
+      SELECT
+        id,
+        name,
+        email,
+        password_hash,
+        password_reset_token_hash,
+        password_reset_token_expires_at,
+        password_salt,
+        created_at
+      FROM auth_users
+      WHERE
+        password_reset_token_hash = ${tokenHash}
+        AND password_reset_token_expires_at > NOW()
+      LIMIT 1
+    `) as DatabaseUserRow[];
+
+    const [user] = rows;
+    return user ? mapDatabaseUser(user) : null;
+  });
 }

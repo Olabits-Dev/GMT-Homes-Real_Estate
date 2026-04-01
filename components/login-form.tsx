@@ -65,6 +65,13 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             <p className="text-sm text-[color:#b42318]">{state.errors.password[0]}</p>
           ) : null}
         </label>
+
+        <p className="text-right text-xs font-semibold text-[color:var(--muted)]">
+          Forgot your password?{" "}
+          <Link href="/forgot-password" className="text-[color:var(--accent)]">
+            Reset it here
+          </Link>
+        </p>
       </div>
 
       {state.message ? (

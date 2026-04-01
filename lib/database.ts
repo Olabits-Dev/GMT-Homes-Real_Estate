@@ -64,6 +64,21 @@ async function initializeSchema() {
   `;
 
   await sql`
+    ALTER TABLE auth_users
+    ADD COLUMN IF NOT EXISTS password_reset_token_hash TEXT
+  `;
+
+  await sql`
+    ALTER TABLE auth_users
+    ADD COLUMN IF NOT EXISTS password_reset_token_expires_at TIMESTAMPTZ
+  `;
+
+  await sql`
+    CREATE INDEX IF NOT EXISTS auth_users_password_reset_token_hash_idx
+    ON auth_users (password_reset_token_hash)
+  `;
+
+  await sql`
     CREATE TABLE IF NOT EXISTS community_properties (
       id TEXT PRIMARY KEY,
       slug TEXT NOT NULL UNIQUE,

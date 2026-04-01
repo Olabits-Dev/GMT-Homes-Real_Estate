@@ -96,6 +96,12 @@ export default async function DashboardPage({
                 <p className="mt-2 text-base font-semibold">{user.email}</p>
               </div>
             </div>
+            <Link
+              href="/reset-password"
+              className="mt-6 inline-flex items-center rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5"
+            >
+              Reset password
+            </Link>
           </div>
 
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-[var(--shadow-card)] sm:p-8">
