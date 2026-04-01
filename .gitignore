@@ -33,10 +33,17 @@ yarn-error.log*
 # env files
 .env*
 !.env.example
+frontend/.env*
+!frontend/.env.example
+backend/.env*
+!backend/.env.example
 
 # runtime demo data
 data/auth-users.json
 data/community-properties.json
+backend/data/auth-users.json
+backend/data/community-properties.json
+backend/data/inspection-bookings.json
 
 # vercel
 .vercel
@@ -44,3 +51,7 @@ data/community-properties.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+frontend/next-env.d.ts
+frontend/.next
+frontend/out
+backend/dist

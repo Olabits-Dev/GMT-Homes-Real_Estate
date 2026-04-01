@@ -1,8 +1,8 @@
 # GMT Homes
 
-GMT Homes is a polished real estate platform built with Next.js App Router for GMT Software's frontend training brief. It now combines a public property-browsing experience with a lightweight authentication and publishing workflow where visitors can explore listings freely, create accounts, sign in, access a publisher dashboard, and submit community listings through protected server actions.
+GMT Homes is a polished real estate platform built with Next.js App Router for GMT Software's frontend training brief. It now combines a public property-browsing experience with role-aware authentication where visitors can explore listings freely, create buyer, renter, or agent accounts, sign in, access a personalized dashboard, and submit community listings through protected server actions backed by migration-aware PostgreSQL storage.
 
-The current build goes beyond the base brief with a branded GMT Homes experience, a rotating homepage hero, locally hosted property photography, WhatsApp-first contact actions, interactive galleries, secure cookie-based sessions, and a server-backed publishing flow for community-added listings.
+The current build goes beyond the base brief with a branded GMT Homes experience, a rotating homepage hero, locally hosted property photography, WhatsApp-first contact actions, interactive galleries, secure cookie-based sessions, PostgreSQL-backed publishing and moderation, embedded maps, inspection booking, cloud-ready image uploads for community listings, and admin tooling for migrations and account promotion.
 
 ## Live Product Scope
 
@@ -14,9 +14,12 @@ The app currently includes:
 - a searchable listings page with filters for location, property type, listing status, price range, and saved-only results
 - grid and list display modes for browsing listings
 - dynamic property detail pages with image gallery, fullscreen lightbox, amenities, coordinates, Google Maps link, and WhatsApp contact actions
-- sign-up and sign-in flows for community contributors
-- a protected publisher dashboard for reviewing recent submissions
-- an add-property workflow that requires authentication and publishes community listings to a server-backed store so they appear instantly in the catalog
+- sign-up and sign-in flows for buyers, renters, agents, and promoted admins
+- a protected dashboard for reviewing listings, bookings, and role-specific activity
+- an add-property workflow that requires an agent or admin account, uploads real images to cloud storage when configured, and sends community listings through moderation before they appear in the public catalog
+- an admin console for moderating submitted listings and updating inspection bookings
+- embedded OpenStreetMap previews on listing pages and inspection booking directly from the property detail flow
+- a space-aware authenticated header that keeps account navigation, saved items, and account actions balanced across screen sizes
 - persistent favorites and dark mode using browser storage, with favorites scoped per signed-in user
 - fully local seeded property media stored under `public/properties` so the core catalog does not depend on third-party image hosts at runtime
 
@@ -53,7 +56,8 @@ Each property detail page includes:
 - price, location, status, type, and highlight information
 - amenities and property facts
 - WhatsApp and phone contact actions
-- location coordinates and Google Maps deep link
+- embedded OpenStreetMap preview plus Google Maps deep link
+- inspection booking for signed-in buyers, renters, and agents
 
 ### `/login`
 
@@ -67,30 +71,39 @@ The sign-in experience includes:
 
 The sign-up experience includes:
 
-- account creation for community listing contributors
-- validation for name, email, password strength, and password confirmation
-- automatic session creation and redirect into the protected publisher workflow
+- account creation for buyers, renters, and agents
+- validation for name, email, password strength, role selection, and password confirmation
+- automatic session creation and redirect into the protected account workflow
 
 ### `/dashboard`
 
 The dashboard includes:
 
-- an authenticated publisher landing page
-- account summary cards
-- a recent submission list for the signed-in user
-- direct paths back into the add-property and public listings flows
+- an authenticated account landing page
+- role-aware summary cards
+- listing moderation status for agents and admins
+- booking activity for requesters and listing owners
+- direct paths back into publishing, browsing, and admin flows
 
 ### `/add-property`
 
 The add-property experience includes:
 
 - a structured listing form for title, type, status, price, city, location, bedrooms, bathrooms, and description
-- simulated image upload feedback
-- automatic default gallery assignment by property type
+- real cloud upload support when Cloudinary credentials are configured
+- automatic fallback gallery assignment by property type when no upload is provided
 - server-side validation through a protected Server Action
-- authenticated publishing tied to the signed-in account
-- instant appearance in the public listings directory and dashboard
+- authenticated publishing tied to an agent or admin account
+- moderation-aware publishing before listings appear in the public catalog
 - a recent account listings panel sourced from the signed-in publisher record
+
+### `/admin`
+
+The admin console includes:
+
+- community listing moderation controls
+- booking management for inspection requests
+- a single place to review pending marketplace activity
 
 ## Key Features
 
@@ -110,17 +123,27 @@ The add-property experience includes:
 
 ### Authentication and Publishing
 
+- buyer, renter, agent, and admin account roles
 - account sign-up and sign-in flows
 - cookie-based session management for authenticated routes
-- protected `/dashboard` and `/add-property` routes via `proxy.ts`
-- server-backed community listing creation with account ownership
+- protected `/dashboard`, `/add-property`, and `/admin` routes via `proxy.ts`
+- server-backed community listing creation with account ownership and moderation status
+- inspection booking connected to authenticated accounts
 - per-user favorites storage keyed by the signed-in account
+
+### Database and Admin Tooling
+
+- PostgreSQL schema changes tracked through a `schema_migrations` ledger
+- repo-level scripts for `db:migrate`, `db:status`, `db:summary`, and `db:make-admin`
+- automatic local database bootstrap when `DATABASE_URL` points at a missing localhost database
+- admin promotion support for trusted operator accounts without exposing admin self-signup
 
 ### Media and Visuals
 
 - all seeded housing photos served locally from `public/properties`
 - hero background slideshow on the homepage
 - click-to-expand property images with fullscreen modal preview
+- Cloudinary-backed uploads for community listing images when configured
 
 ### Local and Demo-Friendly Persistence
 
@@ -139,97 +162,83 @@ The add-property experience includes:
 - Server Actions
 - `proxy.ts` route protection
 - `next/font` for typography
+- Node.js backend service
 - browser `localStorage` for favorites and theme persistence
-- Neon Postgres for deployed auth and community listing storage
-- local JSON fallback for development-only auth and community listing storage
+- PostgreSQL through `DATABASE_URL` for auth, moderation, booking, and community listing storage
+- local JSON fallback for development-only auth and community listing storage when `DATABASE_URL` is omitted
 
 ## Project Structure
 
 ```text
-app/
-  actions/
-  add-property/
-  dashboard/
-  login/
-  properties/
-    [slug]/
-  signup/
-components/
-  add-property-form.tsx
-  app-providers.tsx
-  favorite-button.tsx
-  form-submit-button.tsx
-  home-hero.tsx
-  image-lightbox.tsx
-  login-form.tsx
-  properties-explorer.tsx
-  property-card.tsx
-  property-detail-view.tsx
-  property-gallery.tsx
-  site-footer.tsx
-  site-header.tsx
-  signup-form.tsx
-data/
-  auth-users.example.json
-  community-properties.example.json
-  listing-options.ts
-  property-options.ts
-  properties.ts
-lib/
-  auth-store.ts
-  auth.ts
-  browser-storage.ts
-  community-property-store.ts
-  file-store.ts
-  passwords.ts
-  property-utils.ts
-  server-env.ts
-  session.ts
-public/
-  properties/
-types/
-proxy.ts
+frontend/
+  app/
+    actions/
+    add-property/
+    dashboard/
+    login/
+    properties/
+      [slug]/
+    signup/
+  components/
+  data/
+  lib/
+  public/
+  types/
+  proxy.ts
+backend/
+  src/
+    lib/
+    scripts/
+    services/
+    index.ts
+  data/
+shared/
+  data/
+  types/
 ```
 
 ## Data Model and State
 
-Seeded listing data lives in `data/properties.ts` and powers the homepage hero, featured cards, listings page, and property detail routes.
+Seeded listing data lives in `backend/data/properties.ts` and powers the homepage hero, featured cards, listings page, and property detail routes through the backend service.
 
 Server-backed persistence now supports two environments:
 
-- production and Vercel deployments use Neon Postgres through `DATABASE_URL`
-- local development can still fall back to `data/auth-users.json` and `data/community-properties.json`
-- `data/auth-users.example.json` and `data/community-properties.example.json` are safe tracked templates
+- local and deployed environments can use PostgreSQL through `DATABASE_URL`
+- local development can still fall back to `backend/data/auth-users.json`, `backend/data/community-properties.json`, and `backend/data/inspection-bookings.json`
+- `backend/data/auth-users.example.json`, `backend/data/community-properties.example.json`, and `backend/data/inspection-bookings.example.json` are safe tracked templates
+- PostgreSQL schema changes are tracked in the `schema_migrations` table and managed through the repo database scripts
 
 The publishing flow is coordinated by:
 
-- `lib/auth-store.ts` for account lookup and creation
-- `lib/database.ts` for Neon connection setup and schema bootstrapping
-- `lib/session.ts` for signed cookie sessions
-- `lib/auth.ts` for session-aware helpers and protected route flow
-- `lib/community-property-store.ts` for reading and writing community listings
-- `lib/server-env.ts` for server-only environment configuration
+- `backend/src/services/auth-store.ts` for account lookup and creation
+- `backend/src/lib/database.ts` and `backend/src/lib/migrations.ts` for PostgreSQL connection setup and schema migration management
+- `frontend/lib/session.ts` for signed cookie sessions
+- `frontend/lib/auth.ts` for session-aware helpers and protected route flow
+- `frontend/lib/backend-client.ts` for frontend-to-backend service calls
+- `backend/src/services/community-property-store.ts` for reading and writing community listings
+- `backend/src/services/inspection-booking-store.ts` for scheduling data
 
-Browser-side persistence still lives in `lib/browser-storage.ts` and stores:
+Browser-side persistence still lives in `frontend/lib/browser-storage.ts` and stores:
 
 - saved property slugs
 - theme preference
 
-Context providers in `components/app-providers.tsx` expose favorites and theme controls across the app, with favorites now separated by signed-in user.
+Context providers in `frontend/components/app-providers.tsx` expose favorites and theme controls across the app, with favorites now separated by signed-in user.
 
 ## Authentication Process
 
 The current auth flow is intentionally lightweight and demo-friendly, but it now follows a real application structure:
 
-1. A contributor signs up on `/signup` or signs in on `/login`.
-2. The form submits to a Server Action in `app/actions/auth.ts`.
-3. Credentials are validated on the server and contributor accounts are stored in Neon Postgres when `DATABASE_URL` is configured.
-4. A signed session cookie is created through `lib/session.ts`.
-5. `proxy.ts` protects `/dashboard` and `/add-property`, redirecting unauthenticated users to `/login`.
-6. Authenticated users can publish from `/add-property`, and the submission is stored in Neon Postgres when `DATABASE_URL` is configured.
-7. Published community listings immediately appear in the public listings directory and on the contributor dashboard.
+1. A buyer, renter, or agent signs up on `/signup` or signs in on `/login`.
+2. The form submits to a Server Action in `frontend/app/actions/auth.ts`.
+3. The frontend calls the Node backend, where credentials are validated and role-aware accounts are stored in PostgreSQL when `DATABASE_URL` is configured.
+4. A signed session cookie is created through `frontend/lib/session.ts`.
+5. `frontend/proxy.ts` protects `/dashboard`, `/add-property`, and `/admin`, redirecting unauthenticated users to `/login`.
+6. Agent and admin accounts can publish from `/add-property`, and the submission is stored in PostgreSQL when `DATABASE_URL` is configured.
+7. Admins moderate submitted community listings before they appear in the public catalog.
+8. Signed-in users can request inspections from property pages, and those bookings flow into dashboards and the admin console.
 
-For local development without a database, the same flows can fall back to the gitignored `data/*.json` runtime files.
+For local development without a database, the same flows can fall back to the gitignored `backend/data/*.json` runtime files.
 
 ## Contact Flow
 
@@ -246,14 +255,29 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-For production-like auth behavior, copy `.env.example` to `.env.local` and provide a strong `SESSION_SECRET`, a valid `DATABASE_URL`, plus the correct `SITE_URL` and GMT Homes contact values.
+For the current local PostgreSQL setup, use:
+
+```env
+DATABASE_URL=postgresql://postgres:1414@localhost:5432/GMT%20Homes
+```
+
+The workspace uses separate frontend and backend env files:
+
+- copy `frontend/.env.example` to `frontend/.env.local`
+- copy `backend/.env.example` to `backend/.env.local`
+- keep `SESSION_SECRET`, `BACKEND_SERVICE_TOKEN`, `SITE_URL`, and `DATABASE_URL` aligned with your local setup
+- add the Cloudinary variables in `frontend/.env.local` if you want real property image uploads instead of fallback gallery images
+- when `DATABASE_URL` points to local PostgreSQL, the backend will create the named database automatically on first boot if it does not exist yet
+- if you want to use the development JSON fallback instead, remove `DATABASE_URL` from your local backend env file
+- run `npm run db:migrate` to apply schema changes, `npm run db:status` to inspect migration state, and `npm run db:summary` to inspect current storage totals
+- after creating your first admin user, run `npm run db:make-admin -- person@example.com` to promote that account into the admin console
 
 ## Security Notes
 
 - Keep real secrets in `.env.local` for local development and in Vercel Project Settings for deployed environments.
-- Commit `.env.example`, but never commit `.env.local`, `.env.production`, or other real env files.
-- `SESSION_SECRET`, `DATABASE_URL`, `SITE_URL`, and GMT Homes contact settings are loaded from environment variables so sensitive runtime config stays out of client code.
-- `data/auth-users.json` and `data/community-properties.json` are development-only runtime data files and are gitignored. The committed `*.example.json` files are the safe templates.
+- Commit `.env.example`, `frontend/.env.example`, and `backend/.env.example`, but never commit real `.env.local` files.
+- `SESSION_SECRET`, `BACKEND_SERVICE_TOKEN`, `DATABASE_URL`, `SITE_URL`, and GMT Homes contact settings are loaded from environment variables so sensitive runtime config stays out of client code.
+- `backend/data/auth-users.json`, `backend/data/community-properties.json`, and `backend/data/inspection-bookings.json` are development-only runtime data files and are gitignored. The committed `*.example.json` files are the safe templates.
 - If `SESSION_SECRET` is rotated, existing signed-in sessions become invalid and users must sign in again.
 - Deployed auth and community submissions now expect a real database connection. If `DATABASE_URL` is missing in production, sign-in and publishing will fail safely with a configuration message.
 
@@ -264,6 +288,10 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run db:migrate
+npm run db:status
+npm run db:summary
+npm run db:make-admin -- you@example.com
 ```
 
 ## Verification
@@ -272,7 +300,7 @@ This project has been verified with:
 
 ```bash
 npm run lint
-npm run build
+npm run db:migrate
 ```
 
 ## Challenges Solved During the Build
@@ -295,18 +323,23 @@ The app evolved from the original brief into a more brand-led real estate experi
 
 ### 5. Adding authentication without losing the fast demo workflow
 
-The app originally treated listing submissions as browser-only state, which made ownership, access control, and repeat publishing unrealistic. The current build introduces account creation, sign-in, signed sessions, route protection, and a protected dashboard, while keeping local development simple through a JSON fallback and using Neon-backed storage for deployed environments.
+The app originally treated listing submissions as browser-only state, which made ownership, access control, and repeat publishing unrealistic. The current build introduces account creation, sign-in, signed sessions, route protection, a protected dashboard, and a separate Node backend, while keeping local development simple through a JSON fallback and PostgreSQL-backed storage.
+
+### 6. Making local PostgreSQL setup resilient
+
+Once the app depended on PostgreSQL for auth, moderation, and bookings, local setup failures became much more visible. The current backend now supports automatic localhost database creation, migration tracking through `schema_migrations`, and repo-level admin tooling so setup and maintenance stay predictable.
+
+### 7. Keeping signed-in navigation balanced as workflows expanded
+
+The signed-in header had to carry more state than the public one, including dashboard access, publishing, admin links, favorites, theme, and account actions. The current navbar now rebalances those controls more gracefully across authenticated layouts so account pages stay clean without changing the underlying workflow.
 
 ## Future Improvements
 
-- add schema migrations and admin tooling around the current Neon-backed storage
-- extend authentication beyond the current publisher flow for buyers, renters, and agents
-- support real image uploads with cloud storage
-- add scheduling or inspection booking
-- integrate embedded maps instead of link-out only
-- add admin moderation for community-submitted listings
+- add email notifications for moderation outcomes and inspection updates
+- let agents manage availability windows for inspections
+- support richer map search around nearby schools, transport, and landmarks
 - deploy to Vercel
 
 ## Summary
 
-GMT Homes now delivers a complete property experience with branded presentation, interactive browsing, authenticated publishing, protected contributor routes, local media assets, persistent user actions, and a realistic demo-ready workflow that is much closer to a real product than the original frontend-only brief.
+GMT Homes now delivers a complete property experience with branded presentation, interactive browsing, role-aware authentication, moderated publishing, booking, embedded maps, cloud-ready media uploads, migration-backed storage, admin tooling, protected management routes, persistent user actions, and a realistic demo-ready workflow that is much closer to a real product than the original frontend-only brief.

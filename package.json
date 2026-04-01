@@ -1,29 +1,24 @@
 {
-  "name": "real-estate-platform",
-  "version": "0.1.0",
+  "name": "gmt-homes-workspace",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
-    "next": "16.2.1",
-    "nodemailer": "^8.0.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "dev": "concurrently --names backend,frontend --prefix-colors cyan,magenta --kill-others-on-fail \"npm run dev --workspace backend\" \"npm run dev --workspace frontend\"",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "build": "npm run build --workspace backend && npm run build --workspace frontend",
+    "lint": "npm run lint --workspace backend && npm run lint --workspace frontend",
+    "db:migrate": "npm run db:migrate --workspace backend",
+    "db:status": "npm run db:status --workspace backend",
+    "db:summary": "npm run db:summary --workspace backend",
+    "db:make-admin": "npm run db:make-admin --workspace backend --",
+    "start:frontend": "npm run start --workspace frontend",
+    "start:backend": "npm run start --workspace backend"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/nodemailer": "^7.0.11",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.1",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "concurrently": "^9.2.1"
   }
 }
