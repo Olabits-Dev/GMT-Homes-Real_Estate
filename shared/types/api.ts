@@ -59,6 +59,7 @@ export type BackendCapabilitiesResponse = {
   inspectionBookingEnabled: boolean;
   moderationEnabled: boolean;
   passwordResetEmailEnabled: boolean;
+  passwordResetLinkDisplayEnabled: boolean;
 };
 
 export type PublishPropertyRequest = {

@@ -11,16 +11,24 @@ export const dynamic = "force-dynamic";
 
 export default async function ForgotPasswordPage() {
   let passwordResetEmailEnabled = false;
+  let passwordResetLinkDisplayEnabled = false;
 
   try {
     const capabilities = await fetchBackendCapabilities();
     passwordResetEmailEnabled = capabilities.passwordResetEmailEnabled;
+    passwordResetLinkDisplayEnabled = capabilities.passwordResetLinkDisplayEnabled;
   } catch (error) {
     console.error("Failed to load backend capabilities.", error);
   }
 
   const showDeliveryNotice =
-    process.env.NODE_ENV === "production" && !passwordResetEmailEnabled;
+    process.env.NODE_ENV === "production" &&
+    !passwordResetEmailEnabled &&
+    !passwordResetLinkDisplayEnabled;
+  const showLinkFallbackNotice =
+    process.env.NODE_ENV === "production" &&
+    !passwordResetEmailEnabled &&
+    passwordResetLinkDisplayEnabled;
 
   return (
     <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
@@ -62,6 +70,14 @@ export default async function ForgotPasswordPage() {
             Password reset emails are not configured on this deployment yet.
             Once SMTP is added to the environment, this page will deliver secure
             reset links automatically.
+          </div>
+        ) : null}
+
+        {showLinkFallbackNotice ? (
+          <div className="mt-8 rounded-[1.5rem] border border-[color:color-mix(in_oklab,#027a48_24%,transparent)] bg-[color:color-mix(in_oklab,#027a48_10%,transparent)] px-5 py-4 text-sm text-[color:#027a48]">
+            Password reset emails are not configured yet, so this deployment
+            will show a one-time reset link directly after you submit a valid
+            account email.
           </div>
         ) : null}
       </section>

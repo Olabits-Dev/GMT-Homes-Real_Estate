@@ -58,7 +58,7 @@ export function ForgotPasswordForm() {
           <p>{state.successMessage}</p>
           {state.resetLink ? (
             <p className="mt-3 break-all">
-              Local reset link:{" "}
+              Reset link:{" "}
               <Link href={state.resetLink} className="font-semibold underline">
                 {state.resetLink}
               </Link>

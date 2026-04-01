@@ -8,7 +8,10 @@ import {
   buildPasswordResetUrl,
 } from "./lib/password-reset.js";
 import { verifyPassword } from "./lib/passwords.js";
-import { getBackendServiceToken } from "./lib/server-env.js";
+import {
+  getBackendServiceToken,
+  shouldShowPasswordResetLinkFallback,
+} from "./lib/server-env.js";
 import {
   createUser,
   findUserByEmail,
@@ -469,7 +472,10 @@ async function handlePasswordResetRequest(request: Request) {
             resetLink = undefined;
           }
         }
-      } else if (process.env.NODE_ENV === "production") {
+      } else if (
+        process.env.NODE_ENV === "production" &&
+        !shouldShowPasswordResetLinkFallback()
+      ) {
         resetLink = undefined;
       }
     }
@@ -857,6 +863,7 @@ export async function handleBackendRequest(request: Request) {
         inspectionBookingEnabled: true,
         moderationEnabled: true,
         passwordResetEmailEnabled: canSendPasswordResetEmails(),
+        passwordResetLinkDisplayEnabled: shouldShowPasswordResetLinkFallback(),
       } satisfies BackendCapabilitiesResponse);
     }
 

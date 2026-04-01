@@ -65,6 +65,10 @@ export function getPasswordResetEmailConfig() {
   };
 }
 
+export function shouldShowPasswordResetLinkFallback() {
+  return getOptionalEnv("PASSWORD_RESET_SHOW_LINK_FALLBACK") === "true";
+}
+
 export function getPasswordResetTokenTtlMinutes() {
   const rawValue = getOptionalEnv("PASSWORD_RESET_TOKEN_TTL_MINUTES");
   const parsedValue = rawValue ? Number(rawValue) : NaN;
