@@ -4,10 +4,10 @@ import {
   isUsingLocalFileStore,
   withDatabase,
 } from "../lib/database.js";
+import { userRoles } from "../lib/auth-roles.js";
 import { readDataFile, writeDataFile } from "../lib/file-store.js";
 import { hashPassword } from "../lib/passwords.js";
 import {
-  userRoles,
   type AuthUser,
   type StoredUser,
   type UserRole,
