@@ -1,14 +1,14 @@
 import { URL } from "node:url";
-import { loadBackendEnv } from "./lib/load-env.ts";
-import { canSendPasswordResetEmails, sendPasswordResetEmail } from "./lib/mailer.ts";
+import { loadBackendEnv } from "./lib/load-env.js";
+import { canSendPasswordResetEmails, sendPasswordResetEmail } from "./lib/mailer.js";
 import {
   createPasswordResetExpiry,
   createPasswordResetToken,
   hashPasswordResetToken,
   buildPasswordResetUrl,
-} from "./lib/password-reset.ts";
-import { verifyPassword } from "./lib/passwords.ts";
-import { getBackendServiceToken } from "./lib/server-env.ts";
+} from "./lib/password-reset.js";
+import { verifyPassword } from "./lib/passwords.js";
+import { getBackendServiceToken } from "./lib/server-env.js";
 import {
   createUser,
   findUserByEmail,
@@ -17,7 +17,7 @@ import {
   setUserPasswordResetToken,
   toPublicUser,
   updateUserPassword,
-} from "./services/auth-store.ts";
+} from "./services/auth-store.js";
 import {
   createCommunityProperty,
   findPropertyBySlugForViewer,
@@ -27,16 +27,16 @@ import {
   getCommunityPropertiesByOwner,
   getModerationQueue,
   moderateCommunityProperty,
-} from "./services/community-property-store.ts";
+} from "./services/community-property-store.js";
 import {
   createInspectionBooking,
   getAllInspectionBookings,
   getInspectionBookingsByOwner,
   getInspectionBookingsByRequester,
   updateInspectionBookingStatus,
-} from "./services/inspection-booking-store.ts";
-import { cityOptions } from "../../shared/data/listing-options.ts";
-import { propertyTypes } from "../../shared/data/property-options.ts";
+} from "./services/inspection-booking-store.js";
+import { cityOptions } from "./lib/listing-options.js";
+import { propertyTypes } from "./lib/property-options.js";
 import type {
   AuthFormErrors,
   AuthFormState,

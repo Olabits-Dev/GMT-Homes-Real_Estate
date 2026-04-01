@@ -47,7 +47,7 @@ export function getBackendBaseUrl() {
     "BACKEND_BASE_URL",
     process.env.NODE_ENV === "development"
       ? "http://127.0.0.1:4000"
-      : undefined,
+      : "https://gmt-homes-real-estate-backend.vercel.app",
   );
 }
 

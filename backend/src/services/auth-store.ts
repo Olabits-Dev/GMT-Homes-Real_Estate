@@ -3,9 +3,9 @@ import {
   isUniqueViolation,
   isUsingLocalFileStore,
   withDatabase,
-} from "../lib/database.ts";
-import { readDataFile, writeDataFile } from "../lib/file-store.ts";
-import { hashPassword } from "../lib/passwords.ts";
+} from "../lib/database.js";
+import { readDataFile, writeDataFile } from "../lib/file-store.js";
+import { hashPassword } from "../lib/passwords.js";
 import {
   userRoles,
   type AuthUser,

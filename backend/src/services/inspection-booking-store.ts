@@ -9,8 +9,8 @@ import {
   isDatabaseConfigured,
   isUsingLocalFileStore,
   withDatabase,
-} from "../lib/database.ts";
-import { readDataFile, writeDataFile } from "../lib/file-store.ts";
+} from "../lib/database.js";
+import { readDataFile, writeDataFile } from "../lib/file-store.js";
 
 const bookingsFileName = "inspection-bookings.json";
 

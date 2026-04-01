@@ -3,6 +3,12 @@
   "framework": null,
   "buildCommand": "",
   "outputDirectory": "public",
+  "rewrites": [
+    {
+      "source": "^/api/(.*)$",
+      "destination": "/api?route=$1"
+    }
+  ],
   "functions": {
     "api/**/*.ts": {
       "maxDuration": 15

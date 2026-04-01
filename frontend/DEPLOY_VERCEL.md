@@ -59,7 +59,7 @@ If you later add a custom domain, update `SITE_URL` to the custom domain and red
 
 Set this to your deployed backend base URL, for example:
 
-- `https://your-backend-project.vercel.app`
+- `https://gmt-homes-real-estate-backend.vercel.app`
 
 Do not add `/api` to the end. The frontend already calls backend API routes under that base URL.
 

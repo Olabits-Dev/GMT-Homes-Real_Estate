@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import {
   getPasswordResetTokenTtlMinutes,
   getSiteUrl,
-} from "./server-env.ts";
+} from "./server-env.js";
 
 export function createPasswordResetToken() {
   return randomBytes(32).toString("hex");

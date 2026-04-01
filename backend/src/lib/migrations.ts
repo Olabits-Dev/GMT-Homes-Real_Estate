@@ -1,4 +1,4 @@
-import type { SqlClient } from "./database.ts";
+import type { SqlClient } from "./database.js";
 
 export type DatabaseMigration = {
   id: string;

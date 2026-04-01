@@ -274,7 +274,7 @@ The workspace uses separate frontend and backend env files:
 
 ### Backend on Vercel
 
-The backend now has a Vercel-friendly function entrypoint at `backend/api/[...route].ts` and keeps local development through `backend/src/index.ts`.
+The backend now has a Vercel-friendly function entrypoint at `backend/api/index.ts`, with `vercel.json` rewriting `/api/*` traffic into that handler, and keeps local development through `backend/src/index.ts`.
 
 When importing the backend as its own Vercel project:
 
@@ -293,7 +293,7 @@ The frontend can be imported separately as a Next.js project with Root Directory
 For the safest rollout:
 
 1. deploy the backend first
-2. copy the backend deployment URL into the frontend project's `BACKEND_BASE_URL`
+2. set the frontend project's `BACKEND_BASE_URL` to `https://gmt-homes-real-estate-backend.vercel.app`
 3. use the exact same `BACKEND_SERVICE_TOKEN` value in both projects
 4. set `SITE_URL` to the frontend public URL
 5. add the Cloudinary envs in the frontend project if you want real image uploads

@@ -1,10 +1,10 @@
-import { loadBackendEnv } from "../lib/load-env.ts";
+import { loadBackendEnv } from "../lib/load-env.js";
 import {
   closeDatabaseConnection,
   ensureDatabaseReady,
   getMigrationStatus,
   withDatabase,
-} from "../lib/database.ts";
+} from "../lib/database.js";
 
 loadBackendEnv();
 

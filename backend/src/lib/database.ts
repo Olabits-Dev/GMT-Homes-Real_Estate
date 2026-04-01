@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { databaseMigrations } from "./migrations.ts";
+import { databaseMigrations } from "./migrations.js";
 
 export type SqlClient = ReturnType<typeof postgres>;
 

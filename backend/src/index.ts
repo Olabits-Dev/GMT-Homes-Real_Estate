@@ -1,8 +1,8 @@
 import { createServer, type IncomingHttpHeaders, type IncomingMessage, type ServerResponse } from "node:http";
 import { Buffer } from "node:buffer";
 import { fileURLToPath } from "node:url";
-import { handleBackendRequest } from "./app.ts";
-import { getHost, getPort } from "./lib/server-env.ts";
+import { handleBackendRequest } from "./app.js";
+import { getHost, getPort } from "./lib/server-env.js";
 
 const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",

@@ -1,4 +1,4 @@
-import { getGmtContactConfig } from "../src/lib/server-env.ts";
+import { getGmtContactConfig } from "../src/lib/server-env.js";
 import type { Property, PropertyType } from "../../shared/types/property.ts";
 
 // Free-use housing photos stored locally under public/properties.

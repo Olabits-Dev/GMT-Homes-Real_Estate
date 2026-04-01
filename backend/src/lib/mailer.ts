@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import {
   getPasswordResetEmailConfig,
   getPasswordResetTokenTtlMinutes,
-} from "./server-env.ts";
+} from "./server-env.js";
 
 let transporter: nodemailer.Transporter | null = null;
 

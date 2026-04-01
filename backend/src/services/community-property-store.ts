@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { cityOptions } from "../../../shared/data/listing-options.ts";
+import { cityOptions } from "../lib/listing-options.js";
 import type { AuthUser, UserRole } from "../../../shared/types/auth.ts";
 import type {
   ListingStatus,
@@ -12,15 +12,15 @@ import {
   getDefaultGalleryForType,
   getPropertyBySlug as getSeedPropertyBySlug,
   properties as seededProperties,
-} from "../../data/properties.ts";
+} from "../../data/properties.js";
 import {
   isDatabaseConfigured,
   isUsingLocalFileStore,
   withDatabase,
-} from "../lib/database.ts";
-import { readDataFile, writeDataFile } from "../lib/file-store.ts";
-import { slugify } from "../lib/property-utils.ts";
-import { getGmtContactConfig } from "../lib/server-env.ts";
+} from "../lib/database.js";
+import { readDataFile, writeDataFile } from "../lib/file-store.js";
+import { slugify } from "../lib/property-utils.js";
+import { getGmtContactConfig } from "../lib/server-env.js";
 
 const communityPropertiesFileName = "community-properties.json";
 

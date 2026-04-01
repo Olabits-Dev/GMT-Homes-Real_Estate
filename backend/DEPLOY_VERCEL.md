@@ -21,15 +21,16 @@ If Vercel has already auto-filled a Build Command or Output Directory for this p
 
 The Vercel entrypoint is:
 
-- `api/[...route].ts`
+- `api/index.ts`
 
-It forwards all `/api/*` requests into the shared backend handler in `src/app.ts`.
+`vercel.json` rewrites all `/api/*` requests into that single function, which then forwards them into the shared backend handler in `src/app.ts`.
 
 `vercel.json` also forces:
 
 - `framework: null`
 - `buildCommand: ""`
 - `outputDirectory: "public"`
+- a rewrite from `^/api/(.*)$` to `/api?route=$1`
 
 This keeps the backend in the `Other` framework preset, skips the package `build` script during deployment, and gives Vercel a valid `public` directory if the project still performs an output-directory check.
 
@@ -39,7 +40,7 @@ The backend now ships a small compatibility page at:
 
 That page is only there to satisfy Vercel's static output expectation for `Other` projects. The actual backend API still runs from:
 
-- `api/[...route].ts`
+- `api/index.ts`
 
 Local development still runs through:
 
@@ -52,6 +53,8 @@ Add these to the backend Vercel project for `Production` and `Preview`:
 - `SITE_URL`
 - `BACKEND_SERVICE_TOKEN`
 - `DATABASE_URL`
+
+For Vercel deployments, `DATABASE_URL` must point to a hosted PostgreSQL database. Do not use a local value like `postgresql://...@localhost:5432/...` there because the deployed function cannot reach your laptop.
 
 Recommended contact configuration:
 
@@ -98,7 +101,7 @@ DATABASE_URL="your-production-db-url" npm run db:make-admin -- you@example.com
 
 After the backend is deployed, copy its deployed base URL into the frontend Vercel project as:
 
-- `BACKEND_BASE_URL=https://your-backend-project.vercel.app`
+- `BACKEND_BASE_URL=https://gmt-homes-real-estate-backend.vercel.app`
 
 The frontend must use the exact same:
 
