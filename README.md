@@ -274,15 +274,39 @@ The workspace uses separate frontend and backend env files:
 
 ### Backend on Vercel
 
-The backend now has a Vercel-friendly function entrypoint at `backend/api/index.ts`, with `vercel.json` rewriting `/api/*` traffic into that handler, and keeps local development through `backend/src/index.ts`.
+The backend now uses a shared request pipeline so local development and the deployed Vercel function both execute the same application logic:
+
+- `backend/src/app.ts` contains the shared backend request handler and route logic
+- `backend/src/index.ts` starts the local Node HTTP server, converts Node requests into Web `Request` objects, and forwards them into `src/app.ts`
+- `backend/api/index.ts` is the Vercel entrypoint, normalizes the rewritten `route` query into `/api/*`, and forwards that request into the same `src/app.ts` handler
+- `backend/public/index.html` is a small compatibility page so Vercel still has a valid static output directory for the backend project
+
+The backend package `build` script is now:
+
+```bash
+cd backend && npm run build
+```
+
+That command runs `tsc --noEmit -p tsconfig.json`, so it acts as a backend typecheck rather than producing a compiled server bundle.
 
 When importing the backend as its own Vercel project:
 
 - set the Root Directory to `backend`
 - use the `Other` framework preset
 - enable `Include source files outside of the Root Directory`
+- override the Build Command and leave it empty
+- set the Output Directory to `public`
 - add the backend environment variables from `backend/.env.example`
 - run `npm run db:migrate` against the production database before first real traffic
+
+The deployed backend is configured by `backend/vercel.json` to:
+
+- set `framework` to `null`
+- keep `buildCommand` empty so Vercel does not try to run the package build as a deploy build step
+- use `public` as the output directory
+- rewrite `/api/*` traffic to `api/index?route=$1`
+
+This structure keeps local development on the Node server in `backend/src/index.ts`, while production traffic runs through the Node.js Vercel function in `backend/api/index.ts` with the same core handler.
 
 See [backend/DEPLOY_VERCEL.md](/Users/macbookpro/Desktop/real-estate-platform/backend/DEPLOY_VERCEL.md) for the exact backend dashboard settings and env checklist.
 
