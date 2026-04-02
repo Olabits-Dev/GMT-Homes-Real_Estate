@@ -51,7 +51,7 @@ If you rotate it later, existing sessions will be invalidated and users will nee
 
 Set this to the public frontend URL, for example:
 
-- `https://your-frontend-project.vercel.app`
+- `https://gmt-homes.vercel.app`
 
 If you later add a custom domain, update `SITE_URL` to the custom domain and redeploy.
 

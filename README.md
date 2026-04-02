@@ -295,7 +295,7 @@ For the safest rollout:
 1. deploy the backend first
 2. set the frontend project's `BACKEND_BASE_URL` to `https://gmt-homes-real-estate-backend.vercel.app`
 3. use the exact same `BACKEND_SERVICE_TOKEN` value in both projects
-4. set `SITE_URL` to the frontend public URL
+4. set `SITE_URL` to `https://gmt-homes.vercel.app`
 5. add the Cloudinary envs in the frontend project if you want real image uploads
 
 See [frontend/DEPLOY_VERCEL.md](/Users/macbookpro/Desktop/real-estate-platform/frontend/DEPLOY_VERCEL.md) for the exact frontend dashboard settings and env checklist.
