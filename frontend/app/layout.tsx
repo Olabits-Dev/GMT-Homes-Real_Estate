@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import Script from "next/script";
 import { AppProviders } from "@/components/app-providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -51,6 +52,12 @@ export default function RootLayout({
         <AppShell viewerPromise={viewerPromise}>
           {children}
         </AppShell>
+        <Script
+          src="https://olabitsaibot.vercel.app/widget.js"
+          data-public-key="pk_live_37f991b8ae92faec9cbf3cffa8784943"
+          data-api-base="https://olabitsaibot.vercel.app"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
